@@ -16,9 +16,9 @@ import java.util.concurrent.TimeUnit;
 import me.legrange.config.Configuration;
 import me.legrange.config.ConfigurationException;
 import me.legrange.config.YamlLoader;
-import static za.co.adept.log.Log.debug;
-import static za.co.adept.log.Log.error;
-import static za.co.adept.log.Log.critical;
+import static me.legrange.log.Log.debug;
+import static me.legrange.log.Log.error;
+import static me.legrange.log.Log.critical;
 
 /**
  *
