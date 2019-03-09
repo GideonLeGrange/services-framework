@@ -68,7 +68,7 @@ public abstract class Service<Conf extends Configuration> {
      * @return The component
      * @throws me.legrange.service.ServiceException
      */
-    final <C extends Component> C getComponent(Class<C> clazz) throws ServiceException {
+    public final <C extends Component> C getComponent(Class<C> clazz) throws ServiceException {
         if (components.containsKey(clazz)) {
             return clazz.cast(components.get(clazz));
         }
