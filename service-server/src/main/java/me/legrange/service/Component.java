@@ -48,25 +48,7 @@ public abstract class Component<S extends Service, C> {
         return service;
     }
 
-
-    protected final void error(Throwable ex) {
-
-    }
-
-    protected final void error(Throwable ex, String msg, Object...args) {
-        
-    }
-    
-    protected final void info(String msg, Object...args) {
-        
-    }
-    
-        protected final void warning(String msg, Object...args) {
-        
-    }
-
-
-    protected <C extends Component> C getComponent(Class<C> clazz) throws ServiceException {
+    public final <C extends Component> C getComponent(Class<C> clazz) throws ServiceException {
         return (C) service.getComponent(clazz);
     }
 
