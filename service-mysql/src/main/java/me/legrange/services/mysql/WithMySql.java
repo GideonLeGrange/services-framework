@@ -7,7 +7,7 @@ import me.legrange.service.WithComponent;
  *
  * @author gideon
  */
-public interface WithMysql extends WithComponent {
+public interface WithMySql extends WithComponent {
     
     default MySqlComponent mysql() throws ServiceException { 
         return getComponent(MySqlComponent.class);

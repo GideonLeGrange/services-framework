@@ -257,7 +257,7 @@ public abstract class Service<Conf extends Configuration> {
                 }
             }
         }
-        throw new ServiceException(format("Cannot find configuration for component '%s' of type '%s' in config object of type '%s'. BUG!",
+        throw new ServiceException(format("Cannot find configuration for component '%s' of type '%s' in config object of type '%s'",
                 com.getName(), com.getClass().getSimpleName(), conf.getClass().getSimpleName()));
     }
 
