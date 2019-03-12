@@ -20,6 +20,8 @@ public class SmtpConfig {
     private int smtpPort;
     @NotBlank(message = "The SMTP Mail From Email is required")
     private String fromEmail;
+    @NotBlank(message = "The SMTP Mail From Name is required")
+    private String fromName;
 
     public String getSmtpHost() {
         return smtpHost;
@@ -61,9 +63,12 @@ public class SmtpConfig {
         this.fromEmail = fromEmail;
     }
 
-    @Override
-    public String toString() {
-        return "SmtpConfig{" + "smtpHost=" + smtpHost + ", smtpUsername=" + smtpUsername + ", smtpPassword=" + smtpPassword + ", smtpPort=" + smtpPort + ", fromEmail=" + fromEmail + '}';
+    public String getFromName() {
+        return fromName;
+    }
+
+    public void setFromName(String fromName) {
+        this.fromName = fromName;
     }
 
 }

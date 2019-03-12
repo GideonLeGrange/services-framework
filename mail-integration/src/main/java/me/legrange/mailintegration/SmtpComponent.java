@@ -2,6 +2,8 @@ package me.legrange.mailintegration;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -39,26 +41,28 @@ public class SmtpComponent extends Component<Service, SmtpConfig> implements Wit
         return "smtp";
     }
 
-    public void sendMail(final String recipientEmail, final String subject, final String emailContent) throws MessagingException, UnsupportedEncodingException {
+    public void sendMail(final String recipientEmail, final String subject, final String emailContent) throws ComponentException {
 
-        final Properties props = getMailProperties();
+        try {
+            final Properties props = getMailProperties();
 
-        final Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+            final Session session = Session.getInstance(props, new javax.mail.Authenticator() {
 
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(conf.getSmtpUsername(), conf.getSmtpPassword());
-            }
-        });
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(conf.getSmtpUsername(), conf.getSmtpPassword());
+                }
+            });
 
-        final MimeMessage mail = new MimeMessage(session);
+            final MimeMessage mail = new MimeMessage(session);
 
-        final Multipart mailParts = new MimeMultipart();
+            final Multipart mailParts = new MimeMultipart();
 
-        final MimeBodyPart contentBodyPart = new MimeBodyPart();
-        contentBodyPart.setContent(emailContent, "text/html");
-        mailParts.addBodyPart(contentBodyPart);
+            final MimeBodyPart contentBodyPart = new MimeBodyPart();
+            contentBodyPart.setContent(emailContent, "text/html");
+            mailParts.addBodyPart(contentBodyPart);
 
+            //leaving this here for when we add file support
 //        if (attachments != null) {
 //            for (final File file : attachments) {
 //                final MimeBodyPart fileBodyPart = new MimeBodyPart();
@@ -71,14 +75,14 @@ public class SmtpComponent extends Component<Service, SmtpConfig> implements Wit
 //                mailParts.addBodyPart(fileBodyPart);
 //            }
 //        }
-        mail.setFrom(new InternetAddress(conf.getFromEmail(), "Test"));
-        mail.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
-        mail.setSubject(subject);
-        mail.setContent(mailParts);
-        System.out.println("Sending ");
-        System.out.println(conf);
-        Transport.send(mail);
-        System.out.println("Sent");
+            mail.setFrom(new InternetAddress(conf.getFromEmail(), conf.getFromName()));
+            mail.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
+            mail.setSubject(subject);
+            mail.setContent(mailParts);
+            Transport.send(mail);
+        } catch (MessagingException | UnsupportedEncodingException ex) {
+            throw new ComponentException(ex.getMessage(), ex);
+        }
     }
 
     private Properties getMailProperties() {
