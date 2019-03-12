@@ -6,10 +6,11 @@ import javax.validation.constraints.NotBlank;
 
 /**
  * Configuration object - RabbitMQ setup
+ *
  * @author gideon
  */
 public class RabbitMqConfig {
-    
+
     @NotBlank(message = "The RabbitMQ username must be specified")
     private String username;
     @NotBlank(message = "The RabbitMQ password must be specified")
@@ -18,11 +19,11 @@ public class RabbitMqConfig {
     private String hostname;
     @NotBlank(message = "The RabbitMQ server virtual host name must be specified (default '/')")
     private String virtualHost = "/";
-    @Min(value=1, message="The RabbitMQ server must have a port in the range 1 to 65535") 
-    @Max(value=65535,message="The RabbitMQ server must have a port in the range 1 to 65535")
+    @Min(value = 1, message = "The RabbitMQ server must have a port in the range 1 to 65535")
+    @Max(value = 65535, message = "The RabbitMQ server must have a port in the range 1 to 65535")
     private int port;
-    @Min(value=1, message="The RabbitMQ retry time must be in the range of 1 to 900 seconds") 
-    @Max(value=900,message="The RabbitMQ retry time must be in the range of 1 to 900 seconds")
+    @Min(value = 1, message = "The RabbitMQ retry time must be in the range of 1 to 900 seconds")
+    @Max(value = 900, message = "The RabbitMQ retry time must be in the range of 1 to 900 seconds")
     private int retryTime = 10;
 
     public String getUsername() {
@@ -73,7 +74,4 @@ public class RabbitMqConfig {
         this.retryTime = retryTime;
     }
 
-    
-    
-    
 }
