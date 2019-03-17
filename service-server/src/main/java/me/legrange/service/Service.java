@@ -16,9 +16,9 @@ import java.util.concurrent.TimeUnit;
 import me.legrange.config.Configuration;
 import me.legrange.config.ConfigurationException;
 import me.legrange.config.YamlLoader;
+import static me.legrange.log.Log.critical;
 import static me.legrange.log.Log.debug;
 import static me.legrange.log.Log.error;
-import static me.legrange.log.Log.critical;
 
 /**
  *
@@ -38,10 +38,10 @@ public abstract class Service<Conf extends Configuration> {
                 System.exit(1);
             }
             Class<? extends Service> serviceClass = determineServiceClass();
-            Service service = serviceClass.newInstance();
+            Service service = serviceClass.getDeclaredConstructor().newInstance();
             try {
                 service.configure(args[0]);
-            } catch (ConfigurationException ex) {
+            } catch (ServiceException ex) {
                 say("Error configuring server: %s", ex.getMessage());
                 ex.printStackTrace();
                 System.exit(1);
@@ -55,14 +55,15 @@ public abstract class Service<Conf extends Configuration> {
                 }
             }
             System.exit(0);
-        } catch (ServiceException | InstantiationException | IllegalAccessException ex) {
+        } catch (ServiceException | InstantiationException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             error(ex, "Fatal error: %s", ex.getMessage());
             System.exit(1);
         }
     }
-    
-    /** Get the running component for the given component class. 
-     * 
+
+    /**
+     * Get the running component for the given component class.
+     *
      * @param <C> The type of the component
      * @param clazz The class representing the component
      * @return The component
@@ -111,16 +112,29 @@ public abstract class Service<Conf extends Configuration> {
     }
 
     /**
-     * Get the class for the configuration of this service. Needs to be provided
-     * by service author.
+     * Get the class for the configuration of this service.
      *
      * @return The configuration class
      */
-    protected abstract Class<Conf> getConfigClass();
+    private Class<Conf> getConfigClass() throws ServiceException {
+        String name = getClass().getName().replace("Service", "Config");
+        if (!name.endsWith("Config")) {
+            name = name + "Config";
+        }
+        try {
+            Class<?> clazz = Class.forName(name);
+            if (Configuration.class.isAssignableFrom(clazz)) {
+                return (Class<Conf>) clazz;
+            }
+            throw new ServiceException(format("Config class '%s' isn't a configuration class", clazz.getSimpleName()));
+        } catch (ClassNotFoundException ex) {
+            throw new ServiceException(format("Could not find config class '%s' for service class '%s'. BUG!", name, getClass().getName()), ex);
+        }
+    }
 
     /**
-     * Find the components we need to activate for this service. The components are
-     * supplied in the order in which they need to be activated. 
+     * Find the components we need to activate for this service. The components
+     * are supplied in the order in which they need to be activated.
      *
      * @return The set of components required.
      * @throws ServiceException
@@ -226,9 +240,13 @@ public abstract class Service<Conf extends Configuration> {
      * @param configFile
      * @throws ConfigurationException
      */
-    private void configure(String configFile) throws ConfigurationException {
+    private void configure(String configFile) throws ServiceException {
         debug("Reading configuration from %s", configFile);
-        conf = YamlLoader.readConfiguration(configFile, getConfigClass());
+        try {
+            conf = YamlLoader.readConfiguration(configFile, getConfigClass());
+        } catch (ConfigurationException ex) {
+            throw new ServiceException(format("Error reading configurion from file %s (%s)", configFile, ex.getMessage()), ex);
+        }
     }
 
     /**
