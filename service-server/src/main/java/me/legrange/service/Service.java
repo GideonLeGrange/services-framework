@@ -306,6 +306,9 @@ public abstract class Service<Conf extends Configuration> {
         if (clazz == null) {
             throw new ServiceException("Could not find the service class to instantiate. Does your application extend Service?");
         }
+        if (clazz == Service.class) {
+            throw new ServiceException("Could not find the service class to instantiate. Did you implement the main method in your class?");
+        }
         return clazz;
     }
 
