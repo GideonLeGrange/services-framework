@@ -21,7 +21,7 @@ public class RabbitMqConfig {
     private String virtualHost = "/";
     @Min(value = 1, message = "The RabbitMQ server must have a port in the range 1 to 65535")
     @Max(value = 65535, message = "The RabbitMQ server must have a port in the range 1 to 65535")
-    private int port;
+    private int port = 5672;
     @Min(value = 1, message = "The RabbitMQ retry time must be in the range of 1 to 900 seconds")
     @Max(value = 900, message = "The RabbitMQ retry time must be in the range of 1 to 900 seconds")
     private int retryTime = 10;
