@@ -1,32 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-     <parent>
+    <parent>
         <groupId>me.legrange</groupId>
         <artifactId>services</artifactId>
         <version>2.2</version>
     </parent>
     <groupId>me.legrange.services</groupId>
-    <artifactId>service-server</artifactId>   
+    <artifactId>service-jooq</artifactId>
     <packaging>jar</packaging>
-    <dependencies>
-        <dependency>
-            <groupId>me.legrange</groupId>
-            <artifactId>yaml-config</artifactId>
-            <version>[2.0.1,)</version>
-        </dependency>
-        <dependency>
-            <groupId>me.legrange</groupId>
-            <artifactId>log</artifactId>
-            <version>[1.0,)</version>
-        </dependency>
-    </dependencies>
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
     </properties>
-    <name>Startable Service</name>
+    
+    <dependencies>
+        <dependency>
+            <groupId>me.legrange.services</groupId>
+            <artifactId>service-mysql</artifactId>
+            <version>[2.1,)</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq</artifactId>
+            <version>3.11.9</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
+    <name>Jooq Integration</name>
     <build>
         <plugins>
             <plugin>
