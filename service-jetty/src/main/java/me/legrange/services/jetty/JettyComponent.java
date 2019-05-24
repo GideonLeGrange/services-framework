@@ -3,6 +3,7 @@ package me.legrange.services.jetty;
 import java.util.EnumSet;
 import java.util.StringJoiner;
 import javax.servlet.DispatcherType;
+import javax.servlet.Servlet;
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
@@ -15,7 +16,8 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 /**
- * A component that adds Jetty HTTP functionality. 
+ * A component that adds Jetty HTTP functionality.
+ *
  * @author gideon
  */
 public class JettyComponent extends Component<Service, JettyConfig> implements WithLogging {
@@ -39,7 +41,7 @@ public class JettyComponent extends Component<Service, JettyConfig> implements W
         try {
             context = new ServletContextHandler(ServletContextHandler.SESSIONS);
             context.setContextPath("/");
-            context.addFilter(ErrorFilter.class, "/*",EnumSet.allOf(DispatcherType.class));
+            context.addFilter(ErrorFilter.class, "/*", EnumSet.allOf(DispatcherType.class));
             server = new Server();
             server.setHandler(context);
             ServerConnector connector = new ServerConnector(server);
@@ -57,10 +59,14 @@ public class JettyComponent extends Component<Service, JettyConfig> implements W
         jerseyProviders.add(endpoint.getCanonicalName());
         updateServlet();
     }
-    
-    public void addProvider(Class provider){
+
+    public void addProvider(Class provider) {
         jerseyProviders.add(provider.getCanonicalName());
         updateServlet();
+    }
+
+    public void addServlet(Class<? extends Servlet> servlet, String baseUrl) {
+        context.addServlet(servlet, baseUrl);
     }
 
     private void updateServlet() {
