@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>me.legrange</groupId>
     <artifactId>services</artifactId>
-    <version>2.2</version>
+    <version>2.3</version>
     <packaging>pom</packaging>
     <modules>
         <module>service-server</module>
@@ -13,6 +13,7 @@
         <module>service-mysql</module>
         <module>service-mail</module>
         <module>service-jooq</module>
+        <module>service-helicopter-orm</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
