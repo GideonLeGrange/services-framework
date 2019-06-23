@@ -9,7 +9,7 @@ import me.legrange.service.WithComponent;
  */
 public interface WithHelicopterOrm extends WithComponent {
 
-    default OrmComponent orm() throws ServiceException {
-        return getComponent(OrmComponent.class);
+    default HelicopterOrmComponent orm() throws ServiceException {
+        return getComponent(HelicopterOrmComponent.class);
     }
 }

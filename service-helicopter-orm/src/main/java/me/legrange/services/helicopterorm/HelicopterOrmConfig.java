@@ -8,7 +8,7 @@ import me.legrange.services.mysql.MySqlConfig;
  *
  * @author matt-vm
  */
-public class OrmConfig extends Configuration {
+public class HelicopterOrmConfig extends Configuration {
 
     @NotNull(message = "MySQL Config is required")
     private MySqlConfig mysql;

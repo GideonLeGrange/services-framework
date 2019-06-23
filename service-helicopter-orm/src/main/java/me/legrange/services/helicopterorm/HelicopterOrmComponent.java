@@ -12,16 +12,16 @@ import net.legrange.orm.OrmException;
  *
  * @author matt-vm
  */
-public class OrmComponent extends Component<Service, OrmConfig> {
+public class HelicopterOrmComponent extends Component<Service, HelicopterOrmConfig> {
 
-    private OrmConfig ormConfig;
+    private HelicopterOrmConfig ormConfig;
 
-    public OrmComponent(Service service) {
+    public HelicopterOrmComponent(Service service) {
         super(service);
     }
 
     @Override
-    public void start(OrmConfig config) throws ComponentException {
+    public void start(HelicopterOrmConfig config) throws ComponentException {
         this.ormConfig = config;
         try {
             //test the connection
