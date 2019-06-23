@@ -1,10 +1,10 @@
 package me.legrange.services.helicopterorm;
 
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
+import me.legrange.service.ServiceException;
+import me.legrange.services.mysql.MySqlComponent;
 import net.legrange.orm.Orm;
 import net.legrange.orm.OrmException;
 
@@ -15,6 +15,7 @@ import net.legrange.orm.OrmException;
 public class OrmComponent extends Component<Service, OrmConfig> {
 
     private OrmConfig ormConfig;
+    private Orm orm;
 
     public OrmComponent(Service service) {
         super(service);
@@ -24,21 +25,14 @@ public class OrmComponent extends Component<Service, OrmConfig> {
     public void start(OrmConfig config) throws ComponentException {
         this.ormConfig = config;
         try {
-            //test the connection
-            Orm testInstance = getInstance();
-            if (testInstance == null) {
-                throw new ComponentException("Could not get ORM instance");
-            }
-        } catch (Throwable ex) {
+            orm = Orm.open(getComponent(MySqlComponent.class).getConnection(), Orm.Driver.MYSQL);
+        } catch (ServiceException | OrmException ex) {
             throw new ComponentException(ex.getMessage(), ex);
         }
     }
 
-    public Orm getInstance() throws SQLException, OrmException {
-
-        final String connectionString = ormConfig.getMysql().getUrl() + "?user=" + ormConfig.getMysql().getUsername() + "password=" + ormConfig.getMysql().getPassword();
-        
-        return Orm.open(DriverManager.getConnection(connectionString), Orm.Driver.MYSQL);
+    public Orm getInstance() {
+        return orm;
     }
 
     @Override
