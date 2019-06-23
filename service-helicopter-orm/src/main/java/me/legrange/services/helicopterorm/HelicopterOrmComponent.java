@@ -2,6 +2,8 @@ package me.legrange.services.helicopterorm;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
@@ -34,11 +36,15 @@ public class HelicopterOrmComponent extends Component<Service, HelicopterOrmConf
         }
     }
 
-    public Orm getInstance() throws SQLException, OrmException {
+    public Orm getInstance() throws OrmException {
 
-        final String connectionString = ormConfig.getMysql().getUrl() + "?user=" + ormConfig.getMysql().getUsername() + "password=" + ormConfig.getMysql().getPassword();
-        
-        return Orm.open(DriverManager.getConnection(connectionString), Orm.Driver.MYSQL);
+        try {
+            final String connectionString = ormConfig.getMysql().getUrl() + "?user=" + ormConfig.getMysql().getUsername() + "password=" + ormConfig.getMysql().getPassword();
+            
+            return Orm.open(DriverManager.getConnection(connectionString), Orm.Driver.MYSQL);
+        } catch (SQLException ex) {
+            throw new OrmException(ex.getMessage(), ex);
+        }
     }
 
     @Override
