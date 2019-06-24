@@ -5,6 +5,7 @@ import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
 import me.legrange.service.ServiceException;
 import me.legrange.services.mysql.MySqlComponent;
+import me.legrange.services.mysql.WithMySql;
 import net.legrange.orm.Orm;
 import net.legrange.orm.OrmException;
 
@@ -12,7 +13,7 @@ import net.legrange.orm.OrmException;
  *
  * @author matt-vm
  */
-public class HelicopterOrmComponent extends Component<Service, HelicopterOrmConfig> {
+public class HelicopterOrmComponent extends Component<Service, HelicopterOrmConfig> implements WithMySql {
 
     private Orm orm;
     private HelicopterOrmConfig ormConfig;
