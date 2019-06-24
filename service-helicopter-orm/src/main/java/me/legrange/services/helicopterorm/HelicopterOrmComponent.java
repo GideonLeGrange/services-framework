@@ -16,7 +16,6 @@ import net.legrange.orm.OrmException;
 public class HelicopterOrmComponent extends Component<Service, HelicopterOrmConfig> implements WithMySql {
 
     private Orm orm;
-    private HelicopterOrmConfig ormConfig;
 
     public HelicopterOrmComponent(Service service) {
         super(service);
@@ -24,7 +23,6 @@ public class HelicopterOrmComponent extends Component<Service, HelicopterOrmConf
 
     @Override
     public void start(HelicopterOrmConfig config) throws ComponentException {
-        this.ormConfig = config;
         try {
             orm = Orm.open(getComponent(MySqlComponent.class).getConnection(), Orm.Driver.MYSQL);
         } catch (ServiceException | OrmException ex) {
