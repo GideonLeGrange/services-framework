@@ -16,7 +16,7 @@ public class RetrofitConfig {
     private AuthMode authMode;
 
     @NotNull(message = "Please set if you would like to enable http logging")
-    private Boolean enableHttpLogging;
+    private boolean enableHttpLogging;
 
     private String autorizationToken;
 
@@ -32,11 +32,11 @@ public class RetrofitConfig {
         this.baseUrl = baseUrl;
     }
 
-    public Boolean getEnableHttpLogging() {
+    public boolean isEnableHttpLogging() {
         return enableHttpLogging;
     }
 
-    public void setEnableHttpLogging(Boolean enableHttpLogging) {
+    public void setEnableHttpLogging(boolean enableHttpLogging) {
         this.enableHttpLogging = enableHttpLogging;
     }
 

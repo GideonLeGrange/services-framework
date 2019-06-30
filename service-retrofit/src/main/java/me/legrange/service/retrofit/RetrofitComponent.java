@@ -39,19 +39,20 @@ public class RetrofitComponent extends Component<Service, RetrofitConfig> {
                 throw new ComponentException(String.format("AuthMode '%s' not implemented - BUG!", config.getAuthMode().name()));
         }
 
-        if (config.getEnableHttpLogging()) {
+        if (config.isEnableHttpLogging()) {
             HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
             clientBuilder.addInterceptor(loggingInterceptor);
         }
 
         retrofit = new Retrofit.Builder()
+                .baseUrl(config.getBaseUrl())
                 .client(clientBuilder.build())
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
     }
 
-    public <C extends RetrofitClientCalls> C getClient(Class<C> clientCalls) {
+    public <C> C createClient(Class<C> clientCalls) {
         return retrofit.create(clientCalls);
     }
 
