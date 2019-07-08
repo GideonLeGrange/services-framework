@@ -1,5 +1,6 @@
 package me.legrange.service.retrofit;
 
+import com.google.gson.Gson;
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
@@ -16,6 +17,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class RetrofitComponent extends Component<Service, RetrofitConfig> {
 
     private Retrofit retrofit;
+
+    private RetrofitConfig config;
+
+    private OkHttpClient client;
+
+    private Gson gson;
 
     public RetrofitComponent(Service service) {
         super(service);
@@ -44,16 +51,23 @@ public class RetrofitComponent extends Component<Service, RetrofitConfig> {
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
             clientBuilder.addInterceptor(loggingInterceptor);
         }
-
-        retrofit = new Retrofit.Builder()
-                .baseUrl(config.getBaseUrl())
-                .client(clientBuilder.build())
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        this.config = config;
+        this.client = clientBuilder.build();
+        this.gson = new Gson();
     }
 
     public <C> C createClient(Class<C> clientCalls) {
+        retrofit = new Retrofit.Builder()
+                .baseUrl(config.getBaseUrl())
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
         return retrofit.create(clientCalls);
+    }
+
+    public <C> C createClient(Class<C> clientCalls, Gson gson) {
+        this.gson = gson;
+        return createClient(clientCalls);
     }
 
     @Override
