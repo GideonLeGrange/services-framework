@@ -16,6 +16,7 @@
         <module>service-helicopter-orm</module>
         <module>service-retrofit</module>
         <module>service-vertx</module>
+        <module>services-object-store</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
