@@ -29,10 +29,10 @@
             <artifactId>service-server</artifactId>
             <version>${project.version}</version>
         </dependency>
-<!--        <dependency>
+        <dependency>
             <groupId>me.legrange</groupId>
             <artifactId>log</artifactId>
-            <version>[1.0,)</version>
-        </dependency>-->
+            <version>1.0.1</version>
+        </dependency>
     </dependencies>
 </project>
