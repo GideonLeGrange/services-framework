@@ -37,7 +37,7 @@ public interface WithLogging extends WithComponent {
      * @param args The message arguments
      */
     default void critical(Throwable ex, String fmt, Object... args) {
-        Log.critical(ex, ex.getMessage(), fmt, args);
+        Log.critical(ex, fmt, args);
     }
 
     /**
@@ -97,7 +97,7 @@ public interface WithLogging extends WithComponent {
      * @param args The message arguments
      */
     default void warning(Throwable ex, String fmt, Object... args) {
-        Log.warning(ex, ex.getMessage(), fmt, args);
+        Log.warning(ex, fmt, args);
     }
 
     /**
