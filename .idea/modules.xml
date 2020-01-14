@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/service-helicopter-orm/service-helicopter-orm.iml" filepath="$PROJECT_DIR$/service-helicopter-orm/service-helicopter-orm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/service-jetty/service-jetty.iml" filepath="$PROJECT_DIR$/service-jetty/service-jetty.iml" />
+      <module fileurl="file://$PROJECT_DIR$/service-jooq/service-jooq.iml" filepath="$PROJECT_DIR$/service-jooq/service-jooq.iml" />
+      <module fileurl="file://$PROJECT_DIR$/service-logging/service-logging.iml" filepath="$PROJECT_DIR$/service-logging/service-logging.iml" />
+      <module fileurl="file://$PROJECT_DIR$/service-mail/service-mail.iml" filepath="$PROJECT_DIR$/service-mail/service-mail.iml" />
+      <module fileurl="file://$PROJECT_DIR$/service-mysql/service-mysql.iml" filepath="$PROJECT_DIR$/service-mysql/service-mysql.iml" />
+      <module fileurl="file://$PROJECT_DIR$/services-object-store/service-object-store.iml" filepath="$PROJECT_DIR$/services-object-store/service-object-store.iml" />
+      <module fileurl="file://$PROJECT_DIR$/service-rabbit-mq/service-rabbit-mq.iml" filepath="$PROJECT_DIR$/service-rabbit-mq/service-rabbit-mq.iml" />
+      <module fileurl="file://$PROJECT_DIR$/service-retrofit/service-retrofit.iml" filepath="$PROJECT_DIR$/service-retrofit/service-retrofit.iml" />
+      <module fileurl="file://$PROJECT_DIR$/service-server/service-server.iml" filepath="$PROJECT_DIR$/service-server/service-server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/service-vertx/service-vertx.iml" filepath="$PROJECT_DIR$/service-vertx/service-vertx.iml" />
+      <module fileurl="file://$PROJECT_DIR$/services.iml" filepath="$PROJECT_DIR$/services.iml" />
+    </modules>
+  </component>
+</project>
