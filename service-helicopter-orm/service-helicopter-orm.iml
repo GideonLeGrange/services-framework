@@ -20,7 +20,7 @@
     <orderEntry type="library" name="Maven: javax.el:javax.el-api:3.0.0" level="project" />
     <orderEntry type="library" name="Maven: org.glassfish.web:javax.el:2.2.6" level="project" />
     <orderEntry type="library" name="Maven: me.legrange:log:1.0.1" level="project" />
-    <orderEntry type="library" name="Maven: net.legrange.orm:core:0.14" level="project" />
+    <orderEntry type="library" name="Maven: net.legrange.orm:core:0.43" level="project" />
     <orderEntry type="library" name="Maven: org.apache.maven:maven-core:3.6.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.maven:maven-model:3.6.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.maven:maven-settings:3.6.0" level="project" />
