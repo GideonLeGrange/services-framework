@@ -49,3 +49,7 @@ pom.xml.releaseBackup
 pom.xml.next
 release.properties
 pom.xml.versionsBackup
+
+### IntelliJ
+.idea
+*.iml
