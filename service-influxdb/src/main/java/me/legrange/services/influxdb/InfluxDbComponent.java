@@ -35,6 +35,9 @@ public class InfluxDbComponent extends Component<Service, InfluxDbConfig> implem
             if (response.getVersion().equalsIgnoreCase("unknown")) {
                 error("Error pinging InfluxDB server (%s)", response.toString());
             }
+            else {
+                connected = true;
+            }
             if (!connected) {
                 warning("Could not connect to InfluxDb server. Retrying in %d seconds", conf.getRetryTime());
                 try {
