@@ -1,5 +1,6 @@
 package me.legrange.services.influxdb;
 
+import me.legrange.service.ComponentNotFoundException;
 import me.legrange.service.ServiceException;
 import me.legrange.service.WithComponent;
 
@@ -9,7 +10,7 @@ import me.legrange.service.WithComponent;
  */
 public interface WithInfluxDb extends WithComponent {
 
-    default InfluxDbComponent influx() throws ServiceException {
+    default InfluxDbComponent influx() throws ComponentNotFoundException {
         return getComponent(InfluxDbComponent.class);
     }
 
