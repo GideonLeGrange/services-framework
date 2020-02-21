@@ -48,7 +48,7 @@ public abstract class Component<S extends Service, C> {
         return service;
     }
 
-    public final <C extends Component> C getComponent(Class<C> clazz) throws ServiceException {
+    public final <C extends Component> C getComponent(Class<C> clazz) throws ComponentNotFoundException {
         return (C) service.getComponent(clazz);
     }
 

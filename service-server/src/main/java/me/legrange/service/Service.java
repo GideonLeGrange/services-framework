@@ -69,11 +69,11 @@ public abstract class Service<Conf extends Configuration> {
      * @return The component
      * @throws me.legrange.service.ServiceException
      */
-    public final <C extends Component> C getComponent(Class<C> clazz) throws ServiceException {
+    public final <C extends Component> C getComponent(Class<C> clazz) throws ComponentNotFoundException {
         if (components.containsKey(clazz)) {
             return clazz.cast(components.get(clazz));
         }
-        throw new ServiceException(format("No component registered of type '%s'. BUG!", clazz.getSimpleName()));
+        throw new ComponentNotFoundException(format("No component registered of type '%s'. BUG!", clazz.getSimpleName()));
     }
 
     /**

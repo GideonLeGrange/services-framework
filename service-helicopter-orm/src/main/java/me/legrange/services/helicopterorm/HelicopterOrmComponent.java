@@ -25,7 +25,7 @@ public class HelicopterOrmComponent extends Component<Service, HelicopterOrmConf
     public void start(HelicopterOrmConfig config) throws ComponentException {
         try {
             orm = Orm.open(getComponent(MySqlComponent.class).getConnection(), Orm.Dialect.MYSQL);
-        } catch (ServiceException | OrmException ex) {
+        } catch (OrmException ex) {
             throw new ComponentException(ex.getMessage(), ex);
         }
     }
