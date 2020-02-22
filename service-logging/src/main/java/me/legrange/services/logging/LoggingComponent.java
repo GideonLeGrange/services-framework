@@ -3,6 +3,7 @@ package me.legrange.services.logging;
 import static java.lang.String.format;
 import me.legrange.log.Logger;
 import me.legrange.log.Log;
+import me.legrange.log.logger.ConsoleLogger;
 import me.legrange.log.logger.FileLogger;
 import me.legrange.log.logger.LoggerException;
 import me.legrange.log.logger.NumberedExceptionLogger;
@@ -27,6 +28,9 @@ public class LoggingComponent extends Component<Service, LoggingConfig> {
             Logger logger = null;
             if (config.getFileLogger() != null) {
                 logger = startFileLogger(config.getFileLogger());
+            }
+            else if (config.getConsoleLogger() != null) {
+                logger = startConsoleLogger(config.getConsoleLogger());
             }
             else {
                 throw new ComponentException(format("No primary logger defined. Check your configuration!"));
@@ -54,6 +58,11 @@ public class LoggingComponent extends Component<Service, LoggingConfig> {
 
     private Logger startFileLogger(FileLoggerConfig flc) throws LoggerException {
         return new FileLogger(flc.getFileName());
+    }
+
+
+    private Logger startConsoleLogger(ConsonleLoggerConfig clc) throws LoggerException {
+        return new ConsoleLogger();
     }
 
     private Logger startNumberedExceptionLogger(Logger logger, FileLoggerConfig flc) throws LoggerException {
