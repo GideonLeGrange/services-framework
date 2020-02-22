@@ -11,6 +11,8 @@ import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
 
+import java.io.PrintWriter;
+
 /**
  *
  * @author gideon
@@ -66,6 +68,10 @@ public class LoggingComponent extends Component<Service, LoggingConfig> {
     }
 
     private Logger startNumberedExceptionLogger(Logger logger, FileLoggerConfig flc) throws LoggerException {
-        return new NumberedExceptionLogger(logger, flc.getFileName());
+
+        if (flc.getFileName() != null) {
+            return new NumberedExceptionLogger(logger, flc.getFileName());
+        }
+        return new NumberedExceptionLogger(logger, new PrintWriter(System.err));
     }
 }
