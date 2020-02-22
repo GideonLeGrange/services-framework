@@ -1,14 +1,11 @@
 package me.legrange.services.logging;
 
-import javax.validation.constraints.NotBlank;
-
 /**
  *
  * @author gideon
  */
-public class FileLoggerConfig {
-
-    @NotBlank(message =  "A filename must be specified")
+public class NumberedLoggerConfig {
+    
     private String fileName;
 
     public String getFileName() {

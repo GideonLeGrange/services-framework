@@ -37,7 +37,7 @@ public class LoggingComponent extends Component<Service, LoggingConfig> {
             else {
                 throw new ComponentException(format("No primary logger defined. Check your configuration!"));
             }
-            FileLoggerConfig nelc = config.getNumberedExceptionLogger();
+            NumberedLoggerConfig nelc = config.getNumberedExceptionLogger();
             if (nelc  != null) {
                 logger = startNumberedExceptionLogger(logger, nelc);
             }
@@ -67,7 +67,7 @@ public class LoggingComponent extends Component<Service, LoggingConfig> {
         return new ConsoleLogger();
     }
 
-    private Logger startNumberedExceptionLogger(Logger logger, FileLoggerConfig flc) throws LoggerException {
+    private Logger startNumberedExceptionLogger(Logger logger, NumberedLoggerConfig flc) throws LoggerException {
 
         if (flc.getFileName() != null) {
             return new NumberedExceptionLogger(logger, flc.getFileName());

@@ -14,7 +14,7 @@ public class LoggingConfig {
     private Level level;
     private ConsonleLoggerConfig consoleLogger;
     private FileLoggerConfig fileLogger;
-    private FileLoggerConfig numberedExceptionLogger;
+    private NumberedLoggerConfig numberedExceptionLogger;
 
     public Level getLevel() {
         return level;
@@ -32,11 +32,11 @@ public class LoggingConfig {
         this.fileLogger = fileLogger;
     }
 
-    public FileLoggerConfig getNumberedExceptionLogger() {
+    public NumberedLoggerConfig getNumberedExceptionLogger() {
         return numberedExceptionLogger;
     }
 
-    public void setNumberedExceptionLogger(FileLoggerConfig numberedExceptionLogger) {
+    public void setNumberedExceptionLogger(NumberedLoggerConfig numberedExceptionLogger) {
         this.numberedExceptionLogger = numberedExceptionLogger;
     }
 
