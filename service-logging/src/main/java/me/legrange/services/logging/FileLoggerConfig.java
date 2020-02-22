@@ -8,7 +8,6 @@ import javax.validation.constraints.NotBlank;
  */
 public class FileLoggerConfig {
     
-    @NotBlank(message="The file logger needs to have a log file name specified")
     private String fileName;
 
     public String getFileName() {
