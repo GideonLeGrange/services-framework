@@ -41,12 +41,13 @@ public class LoggingComponent extends Component<Service, LoggingConfig> {
             if (nelc  != null) {
                 logger = startNumberedExceptionLogger(logger, nelc);
             }
-            Log.info("Switching logging to file %s with default level %s", config.getFileLogger().getFileName(), config.getLevel());
-            Log.setDefaultLogger(logger);
-            Log.setDefaultLevel(config.getLevel());
-            Log.info("Logging to file %s with default level %s", config.getFileLogger().getFileName(), config.getLevel());
-            if (nelc != null) {
-                Log.info("Exception logging to file %s", nelc.getFileName());
+            if (!logger.getClass().equals(ConsoleLogger.class)) {
+                Log.info("Switching logging to %s with default level %s", logger.getName(), config.getLevel());
+            }
+                Log.setDefaultLogger(logger);
+                Log.setDefaultLevel(config.getLevel());
+            if (!logger.getClass().equals(ConsoleLogger.class)) {
+                Log.info("Logging to %s with default level %s", logger.getName(), config.getLevel());
             }
         } catch (LoggerException ex) {
             throw new ComponentException(format("Error setting up logging: %s", ex.getMessage()), ex);
