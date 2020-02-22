@@ -1,6 +1,10 @@
 package me.legrange.service;
 
 import static java.lang.String.format;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -13,17 +17,18 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
+
 import me.legrange.config.Configuration;
 import me.legrange.config.ConfigurationException;
 import me.legrange.config.YamlLoader;
+
 import static me.legrange.log.Log.critical;
 import static me.legrange.log.Log.debug;
 import static me.legrange.log.Log.error;
 
 /**
- *
- * @author gideon
  * @param <Conf> The type of the configuration class for this service.
+ * @author gideon
  */
 public abstract class Service<Conf extends Configuration> {
 
@@ -33,14 +38,31 @@ public abstract class Service<Conf extends Configuration> {
 
     public static void main(String... args) {
         try {
-            if (args.length != 1) {
-                say("Usage: Server <config file>");
+            InputStream config = null;
+            switch (args.length) {
+                case 1:
+                    config = new FileInputStream(args[0]);
+                    break;
+                case 2:
+                    switch (args[0]) {
+                        case "-file":
+                            config = new FileInputStream(args[1]);
+                            break;
+                        case "-resource":
+                            config = Service.class.getClassLoader().getResourceAsStream(args[1]);
+                            break;
+                        default:
+                    }
+                    break;
+            }
+            if (config == null) {
+                say("Usage: Server [-file|-resource] <config file> ");
                 System.exit(1);
             }
             Class<? extends Service> serviceClass = determineServiceClass();
             Service service = serviceClass.getDeclaredConstructor().newInstance();
             try {
-                service.configure(args[0]);
+                service.configure(config);
             } catch (ServiceException ex) {
                 say("Error configuring server: %s", ex.getMessage());
                 ex.printStackTrace();
@@ -58,13 +80,15 @@ public abstract class Service<Conf extends Configuration> {
         } catch (ServiceException | InstantiationException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             error(ex, "Fatal error: %s", ex.getMessage());
             System.exit(1);
+        } catch (FileNotFoundException ex) {
+            error(ex, "Fatal error: %s", ex.getMessage());
         }
     }
 
     /**
      * Get the running component for the given component class.
      *
-     * @param <C> The type of the component
+     * @param <C>   The type of the component
      * @param clazz The class representing the component
      * @return The component
      * @throws me.legrange.service.ServiceException
@@ -237,22 +261,21 @@ public abstract class Service<Conf extends Configuration> {
     /**
      * Configure the server.
      *
-     * @param configFile
+     * @param config
      * @throws ConfigurationException
      */
-    private void configure(String configFile) throws ServiceException {
-        debug("Reading configuration from %s", configFile);
+    private void configure(InputStream config) throws ServiceException {
         try {
-            conf = YamlLoader.readConfiguration(configFile, getConfigClass());
+            conf = YamlLoader.readConfiguration(config, getConfigClass());
         } catch (ConfigurationException ex) {
-            throw new ServiceException(format("Error reading configurion from file %s (%s)", configFile, ex.getMessage()), ex);
+            throw new ServiceException(ex.getMessage(), ex);
         }
     }
 
     /**
      * Output text to the console (used for startup errors
      *
-     * @param fmt format string
+     * @param fmt  format string
      * @param args arguments
      */
     private static void say(String fmt, Object... args) {
@@ -261,6 +284,7 @@ public abstract class Service<Conf extends Configuration> {
             System.out.println();
         }
     }
+
 
     private Object getConfigFor(Component com) throws ServiceException {
         String name = com.getName();
