@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>me.legrange</groupId>
     <artifactId>services</artifactId>
-    <version>2.9.1</version>
+    <version>2.10</version>
     <packaging>pom</packaging>
     <modules>
         <module>service-server</module>
@@ -17,6 +17,7 @@
         <module>service-retrofit</module>
         <module>service-vertx</module>
         <module>service-influxdb</module>
+        <module>service-postgresql</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
