@@ -7,13 +7,13 @@
         <version>3.0</version>
     </parent>
     <groupId>me.legrange.services</groupId>
-    <artifactId>service-retrofit</artifactId>
+    <artifactId>service-monitor</artifactId>
     <packaging>jar</packaging>
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
-    
+    <name>Service Monitoring</name>
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -21,23 +21,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.squareup.retrofit2</groupId>
-            <artifactId>retrofit</artifactId>
-            <version>2.5.0</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.retrofit2</groupId>
-            <artifactId>converter-gson</artifactId>
-            <version>2.5.0</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>logging-interceptor</artifactId>
-            <version>3.12.0</version>
-            <type>jar</type>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>service-jetty</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
-    <name>Retrofit Integration</name>
 </project>

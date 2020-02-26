@@ -197,6 +197,13 @@ public abstract class Service<Conf extends Configuration> {
         return res;
     }
 
+    public final <C extends Component> C requireComponent(Class<C> clazz) throws ServiceException {
+        if (components.containsKey(clazz)) {
+            return (C) components.get(clazz);
+        }
+        return startComponent(clazz);
+    }
+
     /**
      * Find all WithComponent interfaces applied to a service class and it's
      * super classes.

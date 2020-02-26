@@ -2,17 +2,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>me.legrange</groupId>
+        <groupId>za.co.adept.services</groupId>
         <artifactId>services</artifactId>
-        <version>3.0</version>
+        <version>2.5.1</version>
     </parent>
-    <groupId>me.legrange.services</groupId>
-    <artifactId>service-vertx</artifactId>
+    <artifactId>service-job-scheduler</artifactId>
     <packaging>jar</packaging>
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <cron4j.version>2.2.5</cron4j.version>
     </properties>
+    <name>Job Scheduler</name>
     
     <dependencies>
         <dependency>
@@ -21,10 +22,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-core</artifactId>
-            <version>3.8.1</version>
+            <groupId>it.sauronsoftware.cron4j</groupId>
+            <artifactId>cron4j</artifactId>
+            <version>${cron4j.version}</version>
         </dependency>
     </dependencies>
-    <name>Vertx Integration</name>
 </project>

@@ -4,9 +4,9 @@ package me.legrange.service;
  * Extended by packaged service components to gain access to useful
  * functionality in the service.
  *
- * @author gideon
  * @param <C> Type of the configuration class
  * @param <S> Type of the service required by this component
+ * @author gideon
  */
 public abstract class Component<S extends Service, C> {
 
@@ -52,4 +52,7 @@ public abstract class Component<S extends Service, C> {
         return (C) service.getComponent(clazz);
     }
 
+    protected <C extends Component> C requireComponent(Class<C> clazz) throws ServiceException {
+        return (C) service.requireComponent(clazz);
+    }
 }

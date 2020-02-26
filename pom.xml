@@ -3,13 +3,15 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>me.legrange</groupId>
     <artifactId>services</artifactId>
-    <version>2.10</version>
+    <version>3.0</version>
     <packaging>pom</packaging>
     <modules>
         <module>service-server</module>
         <module>service-logging</module>
         <module>service-jetty</module>
         <module>service-rabbit-mq</module>
+        <module>service-monitor</module>
+        <module>service-job-scheduler</module>
         <module>service-mysql</module>
         <module>service-mail</module>
         <module>service-jooq</module>
