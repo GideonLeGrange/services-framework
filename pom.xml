@@ -12,6 +12,7 @@
         <module>service-rabbit-mq</module>
         <module>service-monitor</module>
         <module>service-job-scheduler</module>
+        <module>service-panacea-sms</module>
         <module>service-mysql</module>
         <module>service-mail</module>
         <module>service-jooq</module>
