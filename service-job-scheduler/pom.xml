@@ -2,10 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>za.co.adept.services</groupId>
+        <groupId>me.legrange</groupId>
         <artifactId>services</artifactId>
-        <version>2.5.1</version>
+        <version>3.0</version>
     </parent>
+    <groupId>me.legrange.services</groupId>
     <artifactId>service-job-scheduler</artifactId>
     <packaging>jar</packaging>
     <properties>

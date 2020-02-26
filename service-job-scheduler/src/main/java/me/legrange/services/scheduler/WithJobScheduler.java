@@ -1,6 +1,6 @@
 package me.legrange.services.scheduler;
 
-import za.co.adept.services.WithComponent;
+import me.legrange.service.WithComponent;
 
 /**
  *

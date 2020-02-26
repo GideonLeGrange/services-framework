@@ -1,26 +1,22 @@
 package me.legrange.services.scheduler;
 
 import it.sauronsoftware.cron4j.Scheduler;
+import me.legrange.log.Log;
+import me.legrange.service.Component;
+import me.legrange.service.ComponentException;
+import me.legrange.service.Service;
+
 import java.util.Optional;
-import za.co.adept.log.Log;
-import za.co.adept.services.Component;
-import za.co.adept.services.ComponentException;
-import za.co.adept.services.Service;
 
 /**
- *
  * @author matthewl
  */
-public class SchedulerComponent extends Component<SchedulerConfig, Service> {
+public class SchedulerComponent extends Component<Service, SchedulerConfig> {
 
     private SchedulerConfig config;
 
     public SchedulerComponent(Service service) {
         super(service);
-    }
-
-    public SchedulerComponent() {
-        super();
     }
 
     public void scheduleJob(final ScheduledJob scheduledJob) throws JobNotFoundException {
@@ -63,10 +59,5 @@ public class SchedulerComponent extends Component<SchedulerConfig, Service> {
     @Override
     public String getName() {
         return "jobScheduler";
-    }
-
-    @Override
-    public Class<WithJobScheduler> getWithClass() {
-        return WithJobScheduler.class;
     }
 }
