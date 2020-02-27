@@ -11,13 +11,13 @@ import java.util.function.Supplier;
  * @param <S>
  * @author gideon
  */
-public abstract class MonitoredComponent<S extends Service, C> extends Component<S, C> {
+public abstract class MonitoredComponent<S extends Service, C> extends Component<S, C>  implements WithMonitor {
 
     public MonitoredComponent(S service) {
         super(service);
     }
 
-    protected final void monitor(String name, Supplier<State> function) throws ComponentException {
+    public final void monitor(String name, Supplier<State> function) throws ComponentException {
         if (service() instanceof WithMonitor) {
             ((WithMonitor) service()).monitor(name, function);
         }
