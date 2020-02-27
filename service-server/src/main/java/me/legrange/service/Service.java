@@ -91,7 +91,7 @@ public abstract class Service<Conf extends Configuration> {
      * @param <C>   The type of the component
      * @param clazz The class representing the component
      * @return The component
-     * @throws me.legrange.service.ServiceException
+     * @throws me.legrange.service.ComponentNotFoundException Thrown if the component requested cannot be found
      */
     public final <C extends Component> C getComponent(Class<C> clazz) throws ComponentNotFoundException {
         if (components.containsKey(clazz)) {
@@ -229,6 +229,7 @@ public abstract class Service<Conf extends Configuration> {
     /**
      * Start the service. This needs to be implemented by the implementation
      * subclass to get work done.
+     * @throws ServiceException Thrown if the service cannot be started
      */
     protected abstract void start() throws ServiceException;
 

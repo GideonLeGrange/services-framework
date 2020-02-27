@@ -26,7 +26,7 @@ public abstract class Component<S extends Service, C> {
      * done before the component's functionality is available.
      *
      * @param config The component's configuration.
-     * @throws ComponentException
+     * @throws ComponentException Thrown if there is a probme starting the component
      */
     public abstract void start(C config) throws ComponentException;
 
