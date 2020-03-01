@@ -1,4 +1,4 @@
-package me.legrange.services.mysql;
+package me.legrange.services.jdbc;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -10,13 +10,12 @@ class ConnectionPool {
     private static HikariConfig config = new HikariConfig();
     private static HikariDataSource ds;
 
-    ConnectionPool(MySqlConfig myConf) {
-        config.setJdbcUrl(myConf.getUrl());
-        config.setUsername(myConf.getUsername());
-        config.setPassword(myConf.getPassword());
+    ConnectionPool(JdbcConfig conf) {
+        config.setJdbcUrl(conf.getUrl());
+        config.setUsername(conf.getUsername());
+        config.setPassword(conf.getPassword());
         ds = new HikariDataSource(config);
     }
-
 
     Connection getConnection() throws SQLException {
         return ds.getConnection();

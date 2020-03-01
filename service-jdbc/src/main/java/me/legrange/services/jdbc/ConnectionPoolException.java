@@ -1,4 +1,4 @@
-package me.legrange.services.mysql;
+package me.legrange.services.jdbc;
 
 public class ConnectionPoolException extends RuntimeException {
 

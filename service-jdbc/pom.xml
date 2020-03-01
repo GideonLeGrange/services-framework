@@ -7,7 +7,7 @@
         <version>3.1.1</version>
     </parent>
     <groupId>me.legrange.services</groupId>
-    <artifactId>service-mysql</artifactId>
+    <artifactId>service-jdbc</artifactId>
     <packaging>jar</packaging>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -30,6 +30,11 @@
             <version>8.0.12</version>
         </dependency>
         <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>3.4.2</version>
+        </dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>service-server</artifactId>
             <version>${project.version}</version>
@@ -40,9 +45,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>service-jdbc</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>3.4.2</version>
         </dependency>
     </dependencies>
 </project>
