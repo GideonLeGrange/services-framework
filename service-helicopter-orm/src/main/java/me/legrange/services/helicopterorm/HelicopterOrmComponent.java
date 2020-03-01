@@ -3,6 +3,7 @@ package me.legrange.services.helicopterorm;
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
+import me.legrange.services.mysql.ConnectionPoolException;
 import me.legrange.services.mysql.MySqlComponent;
 import me.legrange.services.mysql.WithMySql;
 import net.legrange.orm.Orm;
@@ -26,7 +27,7 @@ public class HelicopterOrmComponent extends Component<Service, HelicopterOrmConf
             orm = OrmBuilder.create(() -> getComponent(MySqlComponent.class).getConnection())
                     .setDialect(Orm.Dialect.MYSQL)
                     .build();
-        } catch (OrmException ex) {
+        } catch (ConnectionPoolException | OrmException ex) {
             throw new ComponentException(ex.getMessage(), ex);
         }
     }
