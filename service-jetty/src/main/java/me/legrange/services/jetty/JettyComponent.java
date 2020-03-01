@@ -1,7 +1,9 @@
 package me.legrange.services.jetty;
 
 import java.util.EnumSet;
+import java.util.StringJoiner;
 import javax.servlet.DispatcherType;
+import javax.servlet.Servlet;
 
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
@@ -23,6 +25,8 @@ public class JettyComponent extends Component<Service, JettyConfig> {
 
     private Server server;
     private ServletContextHandler context;
+
+    private final StringJoiner jerseyProviders = new StringJoiner(",");
 
     public JettyComponent(Service service) {
         super(service);
@@ -66,4 +70,12 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         info("Added new endpoint of type '%s' on '%s'", endpoint.getSimpleName(), path);
     }
 
+//    public void addProvider(Class provider) {
+//        jerseyProviders.add(provider.getCanonicalName());
+//        updateServlet();
+//    }
+//
+//    private void updateServlet() {
+//        serveletHolder.setInitParameter("jersey.config.server.provider.classnames", jerseyProviders.toString());
+//    }
 }
