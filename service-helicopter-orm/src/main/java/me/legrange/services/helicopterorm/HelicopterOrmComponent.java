@@ -5,7 +5,7 @@ import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
 import me.legrange.services.jdbc.ConnectionPoolException;
 import me.legrange.services.jdbc.JdbcComponent;
-import me.legrange.services.jdbc.WithJdbc;
+import me.legrange.services.mysql.WithMySql;
 import net.legrange.orm.Orm;
 import net.legrange.orm.OrmBuilder;
 import net.legrange.orm.OrmException;
@@ -13,7 +13,7 @@ import net.legrange.orm.OrmException;
 /**
  * @author matt-vm
  */
-public class HelicopterOrmComponent extends Component<Service, HelicopterOrmConfig> implements WithJdbc {
+public class HelicopterOrmComponent extends Component<Service, HelicopterOrmConfig> implements WithMySql {
 
     private Orm orm;
 
