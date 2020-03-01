@@ -3,14 +3,13 @@ package me.legrange.services.helicopterorm;
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
-import me.legrange.service.ServiceException;
 import me.legrange.services.mysql.MySqlComponent;
 import me.legrange.services.mysql.WithMySql;
 import net.legrange.orm.Orm;
+import net.legrange.orm.OrmBuilder;
 import net.legrange.orm.OrmException;
 
 /**
- *
  * @author matt-vm
  */
 public class HelicopterOrmComponent extends Component<Service, HelicopterOrmConfig> implements WithMySql {
@@ -24,7 +23,9 @@ public class HelicopterOrmComponent extends Component<Service, HelicopterOrmConf
     @Override
     public void start(HelicopterOrmConfig config) throws ComponentException {
         try {
-            orm = Orm.open(getComponent(MySqlComponent.class).getConnection(), Orm.Dialect.MYSQL);
+            orm = OrmBuilder.create(() -> getComponent(MySqlComponent.class).getConnection())
+                    .setDialect(Orm.Dialect.MYSQL)
+                    .build();
         } catch (OrmException ex) {
             throw new ComponentException(ex.getMessage(), ex);
         }
