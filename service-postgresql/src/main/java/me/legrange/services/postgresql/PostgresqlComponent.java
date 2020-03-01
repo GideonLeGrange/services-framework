@@ -1,33 +1,34 @@
 package me.legrange.services.postgresql;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
+
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
 import me.legrange.services.logging.WithLogging;
 
+import static java.lang.String.format;
+
 /**
- *
  * @author gideon
  */
 public class PostgresqlComponent extends Component<Service, PostgresqlConfig> implements WithLogging {
-    
-    private Connection connection;
+    private ConnectionPool pool;
 
     public PostgresqlComponent(Service service) {
         super(service);
     }
-    
+
     @Override
-     public void start(PostgresqlConfig conf) throws ComponentException {
+    public void start(PostgresqlConfig conf) throws ComponentException {
+        pool = new ConnectionPool(conf);
         boolean connected = false;
         while (!connected) {
-            try{
+            try {
                 info("Connecting to Postgresql server");
-                connection = DriverManager.getConnection(conf.getUrl(), conf.getUsername(), conf.getPassword());
+                Connection connection = pool.getConnection();
                 connected = true;
             } catch (SQLException ex) {
                 error(ex, "Error connecting to Postgresql server: %s", ex.getMessage());
@@ -46,10 +47,14 @@ public class PostgresqlComponent extends Component<Service, PostgresqlConfig> im
     public String getName() {
         return "postgresql";
     }
-    
-    public Connection getConnection() {
-        return connection;
+
+    public Connection getConnection() throws ConnectionPoolException {
+        try {
+            return pool.getConnection();
+        } catch (SQLException e) {
+            throw new ConnectionPoolException(format("Error obtaining MySQL connection from pool (%s)", e.getMessage()), e);
+        }
     }
 
-    
+
 }
