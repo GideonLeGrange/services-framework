@@ -47,7 +47,7 @@ public class JdbcComponent<S extends Service, C extends JdbcConfig> extends Comp
 
     @Override
     public String getName() {
-        return "JDBC";
+        return "jdbc";
     }
 
     public Connection getConnection() throws ConnectionPoolException {
