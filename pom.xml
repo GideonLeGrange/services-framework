@@ -13,6 +13,7 @@
         <module>service-monitor</module>
         <module>service-job-scheduler</module>
         <module>service-panacea-sms</module>
+        <module>service-jdbc</module>
         <module>service-mysql</module>
         <module>service-mail</module>
         <module>service-jooq</module>

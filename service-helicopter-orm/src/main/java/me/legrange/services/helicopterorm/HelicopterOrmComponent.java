@@ -3,9 +3,9 @@ package me.legrange.services.helicopterorm;
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
-import me.legrange.services.mysql.ConnectionPoolException;
-import me.legrange.services.mysql.MySqlComponent;
-import me.legrange.services.mysql.WithMySql;
+import me.legrange.services.jdbc.ConnectionPoolException;
+import me.legrange.services.jdbc.JdbcComponent;
+import me.legrange.services.jdbc.WithJdbc;
 import net.legrange.orm.Orm;
 import net.legrange.orm.OrmBuilder;
 import net.legrange.orm.OrmException;
@@ -13,7 +13,7 @@ import net.legrange.orm.OrmException;
 /**
  * @author matt-vm
  */
-public class HelicopterOrmComponent extends Component<Service, HelicopterOrmConfig> implements WithMySql {
+public class HelicopterOrmComponent extends Component<Service, HelicopterOrmConfig> implements WithJdbc {
 
     private Orm orm;
 
@@ -24,7 +24,7 @@ public class HelicopterOrmComponent extends Component<Service, HelicopterOrmConf
     @Override
     public void start(HelicopterOrmConfig config) throws ComponentException {
         try {
-            orm = OrmBuilder.create(() -> getComponent(MySqlComponent.class).getConnection())
+            orm = OrmBuilder.create(() -> getComponent(JdbcComponent.class).getConnection())
                     .setDialect(Orm.Dialect.MYSQL)
                     .build();
         } catch (ConnectionPoolException | OrmException ex) {

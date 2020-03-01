@@ -29,7 +29,7 @@
         </dependency>
         <dependency>
             <groupId>me.legrange.services</groupId>
-            <artifactId>service-mysql</artifactId>
+            <artifactId>service-jdbc</artifactId>
             <version>${project.version}</version>
             <type>jar</type>
         </dependency>
