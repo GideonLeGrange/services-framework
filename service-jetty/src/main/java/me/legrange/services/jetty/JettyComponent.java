@@ -70,12 +70,8 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         info("Added new endpoint of type '%s' on '%s'", endpoint.getSimpleName(), path);
     }
 
-//    public void addProvider(Class provider) {
-//        jerseyProviders.add(provider.getCanonicalName());
-//        updateServlet();
-//    }
-//
-//    private void updateServlet() {
-//        serveletHolder.setInitParameter("jersey.config.server.provider.classnames", jerseyProviders.toString());
-//    }
+    public void addProvider(Class provider) {
+        jerseyProviders.add(provider.getCanonicalName());
+        context.setInitParameter("jersey.config.server.provider.classnames", jerseyProviders.toString());
+    }
 }
