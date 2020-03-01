@@ -1,6 +1,10 @@
 package me.legrange.services.jetty;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.StringJoiner;
 import javax.servlet.DispatcherType;
 import javax.servlet.Servlet;
@@ -25,8 +29,8 @@ public class JettyComponent extends Component<Service, JettyConfig> {
 
     private Server server;
     private ServletContextHandler context;
-
-    private final StringJoiner jerseyProviders = new StringJoiner(",");
+    private boolean running = false;
+    private final Set<Class> jerseyProviders = new HashSet();
 
     public JettyComponent(Service service) {
         super(service);
@@ -53,13 +57,17 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         }
     }
 
-    /** Add a new endpoint with the given path and endpoint class. 
-     * 
-     * @param path The path 
+    /**
+     * Add a new endpoint with the given path and endpoint class.
+     *
+     * @param path     The path
      * @param endpoint The endpoint class
      */
     public void addEndpoint(String path, Class endpoint) throws ComponentException {
         ResourceConfig rc = new ResourceConfig(GsonJerseyProvider.class, endpoint);
+        for (Class provider : jerseyProviders) {
+            rc.register(provider);
+        }
         ServletHolder holder = new ServletHolder(new ServletContainer(rc));
         context.addServlet(holder, path + "/*");
         try {
@@ -68,10 +76,13 @@ public class JettyComponent extends Component<Service, JettyConfig> {
             throw new ComponentException(ex.getMessage(), ex);
         }
         info("Added new endpoint of type '%s' on '%s'", endpoint.getSimpleName(), path);
+        running = true;
     }
 
-    public void addProvider(Class provider) {
-        jerseyProviders.add(provider.getCanonicalName());
-        context.setInitParameter("jersey.config.server.provider.classnames", jerseyProviders.toString());
+    public void addProvider(Class provider) throws ComponentException {
+        if (running) {
+            throw new ComponentException("You cannot add providers after adding endpoints. Add providers first");
+        }
+        jerseyProviders.add(provider);
     }
 }
