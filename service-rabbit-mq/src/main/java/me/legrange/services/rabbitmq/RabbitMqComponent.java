@@ -64,6 +64,10 @@ public final class RabbitMqComponent extends Component<Service, RabbitMqConfig> 
         }
     }
 
+    public Connection getConnection() {
+        return rabbitMq;
+    }
+
     public Channel getChannel() {
         return channel;
     }
