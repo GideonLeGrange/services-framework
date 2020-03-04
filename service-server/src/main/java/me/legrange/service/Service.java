@@ -183,7 +183,7 @@ public abstract class Service<Conf extends Configuration> {
                 if (Component.class.isAssignableFrom(compClass)) {
                     for (Class<? extends Component> subCompClass : getRequiredComponents(compClass)) {
                         if (!res.contains(subCompClass)) {
-                            res.add(subCompClass);
+                            res.add(0, subCompClass);
                         }
                     }
                     res.add((Class<? extends Component>) compClass);
