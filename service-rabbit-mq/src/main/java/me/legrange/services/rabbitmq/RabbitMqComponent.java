@@ -4,16 +4,20 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.ShutdownSignalException;
+
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
 import me.legrange.services.logging.WithLogging;
 
 /**
- *
  * @author gideon
  */
 public final class RabbitMqComponent extends Component<Service, RabbitMqConfig> implements WithLogging {
@@ -36,7 +40,15 @@ public final class RabbitMqComponent extends Component<Service, RabbitMqConfig> 
                 factory.setUsername(conf.getUsername());
                 factory.setPassword(conf.getPassword());
                 factory.setVirtualHost(conf.getVirtualHost());
-                factory.setHost(conf.getHostname());
+                if (conf.isAmqps()) {
+                    try {
+                        factory.setUri("amqps://" + conf.getHostname());
+                    } catch (URISyntaxException | NoSuchAlgorithmException | KeyManagementException e) {
+                        error("Error configuring amqps URI: %s", e.getMessage());
+                    }
+                } else {
+                    factory.setHost(conf.getHostname());
+                }
                 factory.setPort(conf.getPort());
                 factory.setAutomaticRecoveryEnabled(true);
                 rabbitMq = factory.newConnection();

@@ -17,6 +17,7 @@ public class RabbitMqConfig {
     private String password;
     @NotBlank(message = "The RabbitMQ server host name must be specified")
     private String hostname;
+    private boolean amqps = false;
     @NotBlank(message = "The RabbitMQ server virtual host name must be specified (default '/')")
     private String virtualHost = "/";
     @Min(value = 1, message = "The RabbitMQ server must have a port in the range 1 to 65535")
@@ -48,6 +49,14 @@ public class RabbitMqConfig {
 
     public void setHostname(String hostname) {
         this.hostname = hostname;
+    }
+
+    public boolean isAmqps() {
+        return amqps;
+    }
+
+    public void setAmqps(boolean amqps) {
+        this.amqps = amqps;
     }
 
     public String getVirtualHost() {
