@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import me.legrange.config.Configuration;
 import me.legrange.config.ConfigurationException;
@@ -164,7 +165,9 @@ public abstract class Service<Conf extends Configuration> {
      * @throws ServiceException
      */
     private List<Class<? extends Component>> getRequiredComponents() throws ServiceException {
-        return getRequiredComponents(getClass());
+        List<Class<? extends Component>> list = getRequiredComponents(getClass());
+        debug(() -> format("Required components in load order: %s ", list));
+        return list;
     }
 
     /**
@@ -175,8 +178,11 @@ public abstract class Service<Conf extends Configuration> {
      * @throws ServiceException
      */
     private List<Class<? extends Component>> getRequiredComponents(Class<?> clazz) throws ServiceException {
+        debug(() -> format("getRequiredComponents(%s)", clazz.getSimpleName()));
         List<Class<? extends Component>> res = new LinkedList();
-        for (Class<? extends WithComponent> iface : getWithInterfaces(clazz)) {
+        Set<Class<? extends WithComponent>> interfaces = getWithInterfaces(clazz);
+        debug(() -> format("Interfaces implemented  for %s: %s", clazz.getSimpleName(), interfaces.stream().map(i -> clazz.getSimpleName()).collect(Collectors.toList())));
+        for (Class<? extends WithComponent> iface : interfaces) {
             String name = iface.getName().replace(".With", ".").concat("Component");
             try {
                 Class<?> compClass = Class.forName(name);
