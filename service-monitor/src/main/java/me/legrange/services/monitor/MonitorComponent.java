@@ -5,6 +5,7 @@ import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
 import me.legrange.service.ServiceException;
 import me.legrange.services.jetty.JettyComponent;
+import me.legrange.services.jetty.WithJetty;
 
 import static java.lang.String.format;
 import static me.legrange.log.Log.error;
@@ -22,7 +23,7 @@ import java.util.function.Supplier;
  *
  * @author gideon
  */
-public final class MonitorComponent extends Component<Service, MonitorConfig> {
+public final class MonitorComponent extends Component<Service, MonitorConfig> implements WithJetty {
 
     private final Map<String, Supplier<State>> monitors = new HashMap();
     private static MonitorComponent instance;
@@ -34,13 +35,7 @@ public final class MonitorComponent extends Component<Service, MonitorConfig> {
     @Override
     public void start(MonitorConfig config) throws ComponentException {
         instance = this;
-        JettyComponent jetty;
-        try {
-            jetty = requireComponent(JettyComponent.class);
-        } catch (ServiceException ex) {
-            throw new ComponentException(ex.getMessage(), ex);
-        }
-        jetty.addEndpoint(config.getPath(), StateEndpoint.class);
+        jetty().addEndpoint(config.getPath(), StateEndpoint.class);
         info("Monitoring available via HTTP on %s", config.getPath());
     }
 
