@@ -1,6 +1,8 @@
 package me.legrange.service;
 
-import static java.lang.String.format;
+import me.legrange.config.Configuration;
+import me.legrange.config.ConfigurationException;
+import me.legrange.config.YamlLoader;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -17,14 +19,9 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
-import me.legrange.config.Configuration;
-import me.legrange.config.ConfigurationException;
-import me.legrange.config.YamlLoader;
-
+import static java.lang.String.format;
 import static me.legrange.log.Log.critical;
-import static me.legrange.log.Log.debug;
 import static me.legrange.log.Log.error;
 
 /**
@@ -166,7 +163,6 @@ public abstract class Service<Conf extends Configuration> {
      */
     private List<Class<? extends Component>> getRequiredComponents() throws ServiceException {
         List<Class<? extends Component>> list = getRequiredComponents(getClass());
-        debug(() -> format("Required components in load order: %s ", list));
         return list;
     }
 
@@ -178,21 +174,17 @@ public abstract class Service<Conf extends Configuration> {
      * @throws ServiceException
      */
     private List<Class<? extends Component>> getRequiredComponents(Class<?> clazz) throws ServiceException {
-        debug(() -> format("getRequiredComponents(%s)", clazz.getSimpleName()));
         List<Class<? extends Component>> res = new LinkedList();
         Set<Class<? extends WithComponent>> interfaces = getWithInterfaces(clazz);
-        debug(() -> format("Interfaces implemented  for %s: %s", clazz.getSimpleName(), interfaces.stream().map(i -> clazz.getSimpleName()).collect(Collectors.toList())));
         for (Class<? extends WithComponent> iface : interfaces) {
             String name = iface.getName().replace(".With", ".").concat("Component");
             try {
                 Class<?> compClass = Class.forName(name);
                 if (Component.class.isAssignableFrom(compClass)) {
-                    for (Class<? extends Component> subCompClass : getRequiredComponents(compClass)) {
-                        if (!res.contains(subCompClass)) {
-                            res.add(0, subCompClass);
-                        }
+                    res.addAll(0, getRequiredComponents(compClass));
+                    if (!res.contains(compClass)) {
+                        res.add((Class<? extends Component>) compClass);
                     }
-                    res.add((Class<? extends Component>) compClass);
                 } else {
                     throw new ServiceException(format("Class '%s' associated with interface '%s' does not extend '%s'", name, iface.getName(), Component.class.getName()));
                 }
@@ -211,21 +203,24 @@ public abstract class Service<Conf extends Configuration> {
     }
 
     /**
-     * Find all WithComponent interfaces applied to a service class and it's
+     * Find all WithComponent interfaces applied to a service or component class and it's
      * super classes.
      *
-     * @param serviceClass The service class
+     * @param type The service or component class
      * @return The set of interface classes.
      */
-    private Set<Class<? extends WithComponent>> getWithInterfaces(Class<?> serviceClass) {
+    private Set<Class<? extends WithComponent>> getWithInterfaces(Class<?> type) {
         Set<Class<? extends WithComponent>> res = new HashSet();
-        for (Class<?> iface : serviceClass.getInterfaces()) {
+        for (Class<?> iface : type.getInterfaces()) {
             if (WithComponent.class.isAssignableFrom(iface)) {
                 res.add((Class<? extends WithComponent>) iface);
             }
         }
-        if (Service.class.isAssignableFrom(serviceClass.getSuperclass())) {
-            res.addAll(getWithInterfaces(serviceClass.getSuperclass()));
+        if (Service.class.isAssignableFrom(type.getSuperclass())) {
+            res.addAll(getWithInterfaces(type.getSuperclass()));
+        }
+        else if (Component.class.isAssignableFrom(type.getSuperclass())) {
+            res.addAll(getWithInterfaces(type.getSuperclass()));
         }
         return res;
     }
