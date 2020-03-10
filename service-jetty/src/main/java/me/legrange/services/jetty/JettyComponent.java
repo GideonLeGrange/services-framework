@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.StringJoiner;
 import javax.servlet.DispatcherType;
 import javax.servlet.Servlet;
+import javax.ws.rs.ext.MessageBodyWriter;
 
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
@@ -65,6 +66,7 @@ public class JettyComponent extends Component<Service, JettyConfig> {
      */
     public void addEndpoint(String path, Class endpoint) throws ComponentException {
         ResourceConfig rc = new ResourceConfig(endpoint);
+        checkForMessageBodyWriter();
         for (Class provider : jerseyProviders) {
             rc.register(provider);
         }
@@ -84,5 +86,14 @@ public class JettyComponent extends Component<Service, JettyConfig> {
             throw new ComponentException("You cannot add providers after adding endpoints. Add providers first");
         }
         jerseyProviders.add(provider);
+    }
+
+    /**
+     * Get for a messagebody handler, if it doesn't exist. Add the default one
+     */
+    private void checkForMessageBodyWriter() throws ComponentException {
+        if (!jerseyProviders.stream().anyMatch(p -> p.isAssignableFrom(MessageBodyWriter.class))) {
+            addProvider(GsonJerseyProvider.class);
+        }
     }
 }
