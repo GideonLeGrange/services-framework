@@ -40,7 +40,7 @@ public final class RabbitMqComponent extends Component<Service, RabbitMqConfig> 
                 factory.setUsername(conf.getUsername());
                 factory.setPassword(conf.getPassword());
                 factory.setVirtualHost(conf.getVirtualHost());
-                if (conf.isAmqps()) {
+                if (conf.isSecure()) {
                     try {
                         factory.setUri("amqps://" + conf.getHostname());
                     } catch (URISyntaxException | NoSuchAlgorithmException | KeyManagementException e) {
