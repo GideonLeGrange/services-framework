@@ -218,8 +218,7 @@ public abstract class Service<Conf extends Configuration> {
         }
         if (Service.class.isAssignableFrom(type.getSuperclass())) {
             res.addAll(getWithInterfaces(type.getSuperclass()));
-        }
-        else if (Component.class.isAssignableFrom(type.getSuperclass())) {
+        } else if (Component.class.isAssignableFrom(type.getSuperclass())) {
             res.addAll(getWithInterfaces(type.getSuperclass()));
         }
         return res;
@@ -230,6 +229,7 @@ public abstract class Service<Conf extends Configuration> {
     /**
      * Start the service. This needs to be implemented by the implementation
      * subclass to get work done.
+     *
      * @throws ServiceException Thrown if the service cannot be started
      */
     protected abstract void start() throws ServiceException;
@@ -328,11 +328,9 @@ public abstract class Service<Conf extends Configuration> {
         int idx = 0;
         Class clazz = null;
         while (idx < classContext.length) {
-            clazz = classContext[idx];
-            if (Service.class.isAssignableFrom(clazz)) {
-                if (clazz != Service.class) {
-                    break;
-                }
+            Class next = classContext[idx];
+            if (Service.class.isAssignableFrom(next)) {
+                clazz = next;
             }
             idx++;
         }
