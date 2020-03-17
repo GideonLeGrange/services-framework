@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>me.legrange</groupId>
     <artifactId>services</artifactId>
@@ -32,6 +33,12 @@
     </properties>
     <name>Java Standalone Services Library</name>
     <description>A simple microservices library for Java</description>
+    <developers>
+        <developer>
+            <name>Gideon Le Grange</name>
+            <email>gideon@legrange.me</email>
+        </developer>
+    </developers>
     <url>https://github.com/GideonLeGrange/services-framework</url>
     <licenses>
         <license>
