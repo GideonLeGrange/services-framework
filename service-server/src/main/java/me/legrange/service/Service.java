@@ -49,22 +49,28 @@ public abstract class Service<Conf extends Configuration> {
                         case "-resource":
                             config = Service.class.getClassLoader().getResourceAsStream(args[1]);
                             break;
+                        case "-env-file-path":
+                            String filePath = System.getenv(args[1]);
+                            if(filePath != null && !filePath.isEmpty()){
+                                config = new FileInputStream(filePath);
+                            }else{
+                                failedStartup(String.format("Env variable '%s' is not present", args[1]));
+                            }
+                            break;
                         default:
                     }
                     break;
             }
             if (config == null) {
-                say("Usage: Server [-file|-resource] <config file> ");
-                System.exit(1);
+                failedStartup("Usage: Server [-file|-resource|-env-file-path] <config file> ");
             }
             Class<? extends Service> serviceClass = determineServiceClass();
             Service service = serviceClass.getDeclaredConstructor().newInstance();
             try {
                 service.configure(config);
             } catch (ServiceException ex) {
-                say("Error configuring server: %s", ex.getMessage());
                 ex.printStackTrace();
-                System.exit(1);
+                failedStartup(String.format("Error configuring server: %s", ex.getMessage()));
             }
             service.startComponents();
             service.start();
@@ -341,6 +347,11 @@ public abstract class Service<Conf extends Configuration> {
             throw new ServiceException("Could not find the service class to instantiate. Did you implement the main method in your class?");
         }
         return clazz;
+    }
+
+    private static void failedStartup(String reason){
+        say(reason);
+        System.exit(1);
     }
 
 }
