@@ -1,13 +1,13 @@
 package me.legrange.services.jdbc;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.concurrent.TimeUnit;
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
 import me.legrange.services.logging.WithLogging;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
 
@@ -16,7 +16,8 @@ import static java.lang.String.format;
  * @author gideon
  */
 public class JdbcComponent<S extends Service, C extends JdbcConfig> extends Component<S, C> implements WithLogging {
-    
+
+    private String dialect;
     private ConnectionPool pool;
 
     public JdbcComponent(S service) {
@@ -25,6 +26,7 @@ public class JdbcComponent<S extends Service, C extends JdbcConfig> extends Comp
     
     @Override
      public void start(JdbcConfig conf) throws ComponentException {
+        dialect = conf.getDialect().toUpperCase();
         pool = new ConnectionPool(conf);
         boolean connected = false;
         while (!connected) {
@@ -50,7 +52,7 @@ public class JdbcComponent<S extends Service, C extends JdbcConfig> extends Comp
         return "jdbc";
     }
 
-    public Connection getConnection() throws ConnectionPoolException {
+    public final Connection getConnection() throws ConnectionPoolException {
         try {
             return pool.getConnection();
         } catch (SQLException e) {
@@ -58,5 +60,7 @@ public class JdbcComponent<S extends Service, C extends JdbcConfig> extends Comp
         }
     }
 
-    
+    public final String getDialect() {
+        return dialect;
+    }
 }

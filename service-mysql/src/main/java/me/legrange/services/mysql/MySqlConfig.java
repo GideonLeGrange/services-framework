@@ -12,8 +12,5 @@ import javax.validation.constraints.NotNull;
  * @author gideon
  */
 public final class MySqlConfig extends JdbcConfig {
-    
 
-    
-    
 }

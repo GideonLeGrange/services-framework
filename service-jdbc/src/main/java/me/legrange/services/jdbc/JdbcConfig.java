@@ -7,21 +7,23 @@ import javax.validation.constraints.NotNull;
 
 /**
  * Configuration object
+ *
  * @author gideon
  */
 public class JdbcConfig {
-    
-    @NotBlank(message="The SQL username is required")
+
+    @NotBlank(message = "The SQL dialect is required")
+    private String dialect = "MYSQL";
+    @NotBlank(message = "The SQL username is required")
     private String username;
-    @NotNull(message="The SQL password must be specified")
+    @NotNull(message = "The SQL password must be specified")
     private String password;
-    @NotBlank(message="The SQL database URL is required")
+    @NotBlank(message = "The SQL database URL is required")
     private String url;
-   
-    @Min(value=1, message="SQL retry time must be between 1 and 300 seconds")
-    @Max(value=300, message="SQL retry time must be between 1 and 300 seconds")
+    @Min(value = 1, message = "SQL retry time must be between 1 and 300 seconds")
+    @Max(value = 300, message = "SQL retry time must be between 1 and 300 seconds")
     @NotNull
-     private Integer retryTime = 10;
+    private Integer retryTime = 10;
 
     public String getUsername() {
         return username;
@@ -55,6 +57,11 @@ public class JdbcConfig {
         this.retryTime = retryTime;
     }
 
-    
-    
+    public String getDialect() {
+        return dialect;
+    }
+
+    public void setDialect(String dialect) {
+        this.dialect = dialect;
+    }
 }
