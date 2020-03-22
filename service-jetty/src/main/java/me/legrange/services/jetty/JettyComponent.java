@@ -89,10 +89,10 @@ public class JettyComponent extends Component<Service, JettyConfig> {
     }
 
     /**
-     * Get for a messagebody handler, if it doesn't exist. Add the default one
+     * Check for a MessageBodyWriter, if it doesn't exist. Add the default one
      */
     private void checkForMessageBodyWriter() throws ComponentException {
-        if (!jerseyProviders.stream().anyMatch(p -> p.isAssignableFrom(MessageBodyWriter.class))) {
+        if (jerseyProviders.stream().noneMatch(p -> MessageBodyWriter.class.isAssignableFrom(p))) {
             addProvider(GsonJerseyProvider.class);
         }
     }
