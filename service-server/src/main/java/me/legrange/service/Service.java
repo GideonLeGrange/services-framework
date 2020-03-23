@@ -49,22 +49,6 @@ public abstract class Service<Conf extends Configuration> {
                         case "-resource":
                             config = Service.class.getClassLoader().getResourceAsStream(args[1]);
                             break;
-                        case "-env-file-path":
-                            String filePath = System.getenv(args[1]);
-                            if (filePath != null && !filePath.isEmpty()) {
-                                config = new FileInputStream(filePath);
-                            } else {
-                                failedStartup(String.format("Env variable '%s' is not present", args[1]));
-                            }
-                            break;
-                        case "-env-resource":
-                            String resourceName = System.getenv(args[1]);
-                            if (resourceName != null && !resourceName.isEmpty()) {
-                                config = Service.class.getClassLoader().getResourceAsStream(resourceName);
-                            } else {
-                                failedStartup(String.format("Env variable '%s' is not present", args[1]));
-                            }
-                            break;
                         default:
                     }
                     break;
