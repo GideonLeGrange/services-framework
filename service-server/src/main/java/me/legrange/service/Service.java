@@ -33,7 +33,7 @@ public abstract class Service<Conf extends Configuration> {
     private Conf conf;
     private final Map<Class<? extends Component>, Component> components = new HashMap();
     private final ExecutorService threadPool = new ForkJoinPool(32);
-    
+
     public static void main(String... args) {
         try {
             InputStream config = null;
