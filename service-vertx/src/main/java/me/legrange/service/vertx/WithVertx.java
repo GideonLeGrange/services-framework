@@ -1,5 +1,6 @@
 package me.legrange.service.vertx;
 
+import io.vertx.core.Vertx;
 import me.legrange.service.ComponentNotFoundException;
 import me.legrange.service.ServiceException;
 import me.legrange.service.WithComponent;
@@ -10,7 +11,7 @@ import me.legrange.service.WithComponent;
  */
 public interface WithVertx extends WithComponent {
 
-    default VertxComponent vertx() throws ComponentNotFoundException {
-        return getComponent(VertxComponent.class);
+    default Vertx vertx() throws ComponentNotFoundException {
+        return getComponent(VertxComponent.class).vertx();
     }
 }
