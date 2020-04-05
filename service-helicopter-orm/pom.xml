@@ -12,7 +12,7 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <orm.version>0.51</orm.version>
+        <orm.version>0.52</orm.version>
     </properties>
     <name>Helicopter ORM Integration</name>
     
