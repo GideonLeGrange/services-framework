@@ -54,7 +54,7 @@ public abstract class Service<Conf extends Configuration> {
                     break;
             }
             if (config == null) {
-                failedStartup("Usage: Server [-file|-resource|-env-file-path|-env-resource] <config file> ");
+                failedStartup("Usage: Server [-file|-resource] <config file> ");
             }
             Class<? extends Service> serviceClass = determineServiceClass();
             Service service = serviceClass.getDeclaredConstructor().newInstance();
