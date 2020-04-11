@@ -42,7 +42,8 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
     @Override
     public void start(LetsEncryptConfig config) throws ComponentException {
         this.config = config;
-        jetty().addEndpoint("/.well-known/acme-challenge/", ChallengeEndpoint.class);
+        this.instance = this;
+        jetty().addEndpoint("/.well-known/acme-challenge", ChallengeEndpoint.class);
         if (hasCertificate()) {
             try {
                 activateCertificate();
@@ -79,6 +80,7 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
      * Obtain a new certificate
      */
     private void obtainCertificate() {
+        debug("obtainCertificate()");
         try {
             try {
                 TimeUnit.SECONDS.sleep(10);
@@ -104,6 +106,7 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
      * @param order The order to use
      */
     private void downloadCertificate(Order order) throws LetsEcryptException {
+        debug("downloadCertificate()");
         try {
             while (order.getStatus() != Status.VALID) {
                 try {
@@ -128,8 +131,8 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
      * @throws LetsEcryptException
      */
     private void createCsr(Order order) throws LetsEcryptException {
+        debug("createCsr()");
         KeyPair domainKeyPair = KeyPairUtils.createKeyPair(2048);
-
         CSRBuilder csrb = new CSRBuilder();
         csrb.addDomain(config.getDomain());
         csrb.setOrganization(config.getOrganization());
@@ -151,6 +154,7 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
      * @return
      */
     private Order createOrder(Account account) throws LetsEcryptException {
+        debug("createOrder()");
         try {
             Order order = account.newOrder()
                     .domains(config.getDomain())
@@ -183,8 +187,8 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
      * @throws LetsEcryptException
      */
     private Account createAccount(KeyPair keyPair, boolean onlyExisting) throws LetsEcryptException {
+        debug("createAccount()");
         Session session = new Session(config.getLetsEncryptUrl());
-        ;
         try {
             AccountBuilder builder = new AccountBuilder();
             builder = (onlyExisting) ? builder.onlyExisting() : builder;
@@ -209,6 +213,7 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
      * Obtain Let's Encrypt keys
      */
     private KeyPair obtainKeys() throws LetsEcryptException {
+        debug("obtainKeys()");
         KeyPair accountKeyPair = KeyPairUtils.createKeyPair(2048);
         try (FileWriter fw = new FileWriter(getKeyFileName())) {
             KeyPairUtils.writeKeyPair(accountKeyPair, fw);
@@ -219,6 +224,7 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
     }
 
     private KeyPair loadKeys() throws LetsEcryptException {
+        debug("loadKeys()");
         try {
             return KeyPairUtils.readKeyPair(new FileReader(getKeyFileName()));
         } catch (IOException e) {
