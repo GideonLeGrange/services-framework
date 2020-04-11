@@ -1,6 +1,7 @@
 package me.legrange.services.jetty;
 
 import java.io.IOException;
+import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
+import javax.net.ssl.X509ExtendedKeyManager;
 import javax.servlet.DispatcherType;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
@@ -17,9 +19,15 @@ import javax.ws.rs.ext.MessageBodyWriter;
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 
@@ -52,7 +60,15 @@ public class JettyComponent extends Component<Service, JettyConfig> {
     public void start(JettyConfig config) throws ComponentException {
         try {
             context = makeContext();
-            server = new Server(config.getPort());
+
+            if (config.getSsl() != null)  {
+                server = new Server();
+                ServerConnector sslConnector = makeSslConnector(config);
+                server.setConnectors(new ServerConnector[]{sslConnector});
+            }
+            else {
+                server = new Server(config.getPort());
+            }
             server.setHandler(context);
             server.start();
             info("Started Jetty server on port %d", config.getPort());
@@ -109,6 +125,10 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         }
     }
 
+    public void addKeyStore(KeyStore keyStore) {
+        
+    }
+
     /**
      * Check for a MessageBodyWriter, if it doesn't exist. Add the default one
      */
@@ -123,5 +143,19 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         context.setContextPath("/");
         context.addFilter(ErrorFilter.class, "/*", EnumSet.allOf(DispatcherType.class));
         return context;
+    }
+
+    private ServerConnector makeSslConnector(JettyConfig config) {
+        HttpConfiguration https = new HttpConfiguration();
+        https.addCustomizer(new SecureRequestCustomizer());
+        SslContextFactory sslContextFactory = new SslContextFactory();
+        sslContextFactory.setKeyStorePath(config.getSsl().getKeyStoreFile());
+        sslContextFactory.setKeyStorePassword(config.getSsl().getKeyStorePassword());
+//        sslContextFactory.setKeyManagerPassword("123456");
+        ServerConnector sslConnector = new ServerConnector(server,
+                new SslConnectionFactory(sslContextFactory, "http/1.1"),
+                new HttpConnectionFactory(https));
+        sslConnector.setPort(config.getPort());
+        return sslConnector;
     }
 }

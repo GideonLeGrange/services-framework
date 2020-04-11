@@ -22,6 +22,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.security.KeyPair;
+import java.security.KeyStore;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -73,7 +74,7 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
      * Activate the certificate
      */
     private void activateCertificate() throws LetsEcryptException {
-        throw new LetsEcryptException("Not yet implemented");
+       // throw new LetsEcryptException("Not yet implemented");
     }
 
     /**
@@ -119,9 +120,20 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
             try (FileWriter fw = new FileWriter(getCertificateFileName())) {
                 cert.writeCertificate(fw);
             }
+            storeToKeyStore(cert);
         } catch (AcmeException | IOException ex) {
             throw new LetsEcryptException(format("Error downloading certificate for '%s' (%s)", config.getDomain(), ex.getMessage()));
         }
+    }
+
+    /** Store a certificate to the key store.
+     *
+     * @param cert The certificate to store
+     */
+    private void storeToKeyStore(Certificate cert) {
+        KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+        keystore.setCertificateEntry(config.getDomain(), cert.getCertificate());
+        keystore.store(config.getKeyStoreFileName(), config.getKeyStorePassword());
     }
 
     /**
