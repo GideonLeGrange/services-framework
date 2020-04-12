@@ -18,17 +18,23 @@ import org.shredzone.acme4j.util.CSRBuilder;
 import org.shredzone.acme4j.util.KeyPairUtils;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.security.KeyPair;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
+import static me.legrange.log.Log.debug;
 
 public final class LetsEncryptComponent extends Component<Service, LetsEncryptConfig> implements WithJetty, WithLogging {
 
@@ -130,10 +136,15 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
      *
      * @param cert The certificate to store
      */
-    private void storeToKeyStore(Certificate cert) {
-        KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-        keystore.setCertificateEntry(config.getDomain(), cert.getCertificate());
-        keystore.store(config.getKeyStoreFileName(), config.getKeyStorePassword());
+    private void storeToKeyStore(Certificate cert) throws LetsEcryptException {
+        try (OutputStream out = new FileOutputStream(config.getKeyStore().getKeyStoreFile())) {
+            KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+            keystore.setCertificateEntry(config.getDomain(), cert.getCertificate());
+            keystore.store(out, config.getKeyStore().getKeyStorePassword().toCharArray());
+            info("Stored certificate to key store");
+        } catch ( IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException e) {
+            throw  new LetsEcryptException(format("Error storing certificate to key store (%s)", e.getMessage()),e);
+        }
     }
 
     /**
@@ -178,6 +189,7 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
                     challenge.trigger();
                 }
                 while (auth.getStatus() != Status.VALID) {
+                    debug(("Waiting for Let's Encrypt response"));
                     try {
                         TimeUnit.SECONDS.sleep(3);
                     } catch (InterruptedException e) {

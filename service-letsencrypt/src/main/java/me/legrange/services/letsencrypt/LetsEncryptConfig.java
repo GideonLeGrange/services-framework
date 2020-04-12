@@ -1,6 +1,9 @@
 package me.legrange.services.letsencrypt;
 
+import me.legrange.services.jetty.SslConfig;
+
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 public class LetsEncryptConfig {
 
@@ -12,6 +15,8 @@ public class LetsEncryptConfig {
     private String letsEncryptUrl = "acme://letsencrypt.org/staging";
     @NotBlank(message = "The organizartion name to use in certificates")
     private String organization;
+    @NotNull(message = "The key store must be configured")
+    private SslConfig keyStore;
 
     public String getDataDirectory() {
         return dataDirectory;
@@ -43,5 +48,13 @@ public class LetsEncryptConfig {
 
     public void setOrganization(String organization) {
         this.organization = organization;
+    }
+
+    public SslConfig getKeyStore() {
+        return keyStore;
+    }
+
+    public void setKeyStore(SslConfig keyStore) {
+        this.keyStore = keyStore;
     }
 }

@@ -1,7 +1,12 @@
 package me.legrange.services.jetty;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -31,6 +36,7 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 
+import static java.lang.String.format;
 import static me.legrange.log.Log.info;
 
 /**
@@ -41,6 +47,7 @@ import static me.legrange.log.Log.info;
 public class JettyComponent extends Component<Service, JettyConfig> {
 
     private Server server;
+    private JettyConfig config;
     private ServletContextHandler context;
     private boolean running = false;
     private final Set<Class> jerseyProviders = new HashSet();
@@ -58,12 +65,13 @@ public class JettyComponent extends Component<Service, JettyConfig> {
 
     @Override
     public void start(JettyConfig config) throws ComponentException {
+        this.config = config;
         try {
             context = makeContext();
 
             if (config.getSsl() != null)  {
                 server = new Server();
-                ServerConnector sslConnector = makeSslConnector(config);
+                ServerConnector sslConnector = makeSslConnector();
                 server.setConnectors(new ServerConnector[]{sslConnector});
             }
             else {
@@ -125,10 +133,6 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         }
     }
 
-    public void addKeyStore(KeyStore keyStore) {
-        
-    }
-
     /**
      * Check for a MessageBodyWriter, if it doesn't exist. Add the default one
      */
@@ -145,10 +149,13 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         return context;
     }
 
-    private ServerConnector makeSslConnector(JettyConfig config) {
+    private ServerConnector makeSslConnector() throws ComponentException {
         HttpConfiguration https = new HttpConfiguration();
         https.addCustomizer(new SecureRequestCustomizer());
         SslContextFactory sslContextFactory = new SslContextFactory();
+        if (!keyStoreExists()) {
+            createKeyStore();
+        }
         sslContextFactory.setKeyStorePath(config.getSsl().getKeyStoreFile());
         sslContextFactory.setKeyStorePassword(config.getSsl().getKeyStorePassword());
 //        sslContextFactory.setKeyManagerPassword("123456");
@@ -157,5 +164,20 @@ public class JettyComponent extends Component<Service, JettyConfig> {
                 new HttpConnectionFactory(https));
         sslConnector.setPort(config.getPort());
         return sslConnector;
+    }
+
+    private boolean keyStoreExists() {
+        return new File(config.getSsl().getKeyStoreFile()).exists();
+    }
+
+    private void createKeyStore() throws ComponentException {
+        KeyStore keystore = null;
+        try (FileOutputStream out = new FileOutputStream(config.getSsl().getKeyStoreFile())){
+            keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+            keystore.load(null);
+            keystore.store(out, config.getSsl().getKeyStorePassword().toCharArray());
+        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
+            throw new  ComponentException(format("Cannot create key store (%s)", e.getMessage()),e);
+        }
     }
 }
