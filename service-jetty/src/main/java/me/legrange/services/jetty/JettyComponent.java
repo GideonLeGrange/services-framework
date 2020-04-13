@@ -89,11 +89,11 @@ public class JettyComponent extends Component<Service, JettyConfig> {
     }
 
     /**
-     * Check for a MessageBodyWriter, if it doesn't exist. Add the default one
+     * Check for a MessageBodyWriter
      */
     private void checkForMessageBodyWriter() throws ComponentException {
         if (jerseyProviders.stream().noneMatch(p -> MessageBodyWriter.class.isAssignableFrom(p))) {
-            addProvider(GsonJerseyProvider.class);
+            throw new ComponentException("No MessageBodyWriters were registered for serialization. Remember to register them using the addProvider methods");
         }
     }
 }
