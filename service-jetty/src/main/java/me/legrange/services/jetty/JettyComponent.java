@@ -1,13 +1,17 @@
 package me.legrange.services.jetty;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
 import javax.servlet.DispatcherType;
 import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
 import javax.ws.rs.ext.MessageBodyWriter;
 
 import me.legrange.service.Component;
@@ -32,6 +36,7 @@ public class JettyComponent extends Component<Service, JettyConfig> {
     private ServletContextHandler context;
     private boolean running = false;
     private final Set<Class> jerseyProviders = new HashSet();
+    private final Map<String, Class> endpoints = new HashMap<>();
 
     public JettyComponent(Service service) {
         super(service);
@@ -46,9 +51,7 @@ public class JettyComponent extends Component<Service, JettyConfig> {
     @Override
     public void start(JettyConfig config) throws ComponentException {
         try {
-            context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-            context.setContextPath("/");
-            context.addFilter(ErrorFilter.class, "/*", EnumSet.allOf(DispatcherType.class));
+            context = makeContext();
             server = new Server(config.getPort());
             server.setHandler(context);
             server.start();
@@ -77,15 +80,33 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         } catch (Exception ex) {
             throw new ComponentException(ex.getMessage(), ex);
         }
-        info("Added new endpoint of type '%s' on '%s'", endpoint.getSimpleName(), path);
+        if (endpoints.containsKey(path)) {
+            info("Re-added endpoint of type '%s' on '%s'", endpoint.getSimpleName(), path);
+        }
+        else {
+            info("Added new endpoint of type '%s' on '%s'", endpoint.getSimpleName(), path);
+            endpoints.put(path, endpoint);
+        }
         running = true;
     }
 
     public void addProvider(Class provider) throws ComponentException {
-        if (running) {
-            throw new ComponentException("You cannot add providers after adding endpoints. Add providers first");
-        }
         jerseyProviders.add(provider);
+        if (running) {
+            info("Re-adding %d endpoint(s) because of provider change", endpoints.size());
+            context = makeContext();
+            try {
+                server.stop();
+                server.setHandler(context);
+                server.start();
+            }
+            catch (Exception ex) {
+                throw new ComponentException(ex.getMessage(), ex);
+            }
+            for (Map.Entry<String, Class> pair : endpoints.entrySet()) {
+                addEndpoint(pair.getKey(), pair.getValue());
+            }
+        }
     }
 
     /**
@@ -95,5 +116,12 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         if (jerseyProviders.stream().noneMatch(p -> MessageBodyWriter.class.isAssignableFrom(p))) {
             throw new ComponentException("No MessageBodyWriters were registered for serialization. Remember to register them using the addProvider methods");
         }
+    }
+
+    private ServletContextHandler makeContext() {
+        context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        context.setContextPath("/");
+        context.addFilter(ErrorFilter.class, "/*", EnumSet.allOf(DispatcherType.class));
+        return context;
     }
 }

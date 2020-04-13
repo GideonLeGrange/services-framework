@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>me.legrange</groupId>
+        <artifactId>services</artifactId>
+        <version>3.1.20</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>me.legrange.services</groupId>
+    <artifactId>service-letsencrypt</artifactId>
+    <name>Let's Encrypt Integration</name>
+
+    <properties>
+        <acme4j.version>2.9</acme4j.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>me.legrange.services</groupId>
+            <artifactId>service-server</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>me.legrange.services</groupId>
+            <artifactId>service-jetty</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.shredzone.acme4j</groupId>
+            <artifactId>acme4j-client</artifactId>
+            <version>${acme4j.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.shredzone.acme4j</groupId>
+            <artifactId>acme4j-utils</artifactId>
+            <version>${acme4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>me.legrange.services</groupId>
+            <artifactId>service-logging</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+
+</project>
