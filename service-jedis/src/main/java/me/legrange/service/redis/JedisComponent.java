@@ -20,7 +20,7 @@ public class JedisComponent extends Component<Service, JedisConfig> {
 
     @Override
     public String getName() {
-        return "redis";
+        return "jedis";
     }
 
     Jedis jedis() {
