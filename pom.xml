@@ -25,6 +25,7 @@
         <module>service-postgresql</module>
         <module>service-mongo</module>
         <module>service-letsencrypt</module>
+        <module>service-redis</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
