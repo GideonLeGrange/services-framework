@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>me.legrange</groupId>
     <artifactId>services</artifactId>
-    <version>3.1.22</version>
+    <version>3.2.0</version>
     <packaging>pom</packaging>
     <modules>
         <module>service-server</module>
@@ -25,7 +25,7 @@
         <module>service-postgresql</module>
         <module>service-mongo</module>
         <module>service-letsencrypt</module>
-        <module>service-redis</module>
+        <module>service-jedis</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
