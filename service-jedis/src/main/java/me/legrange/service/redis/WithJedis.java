@@ -6,7 +6,7 @@ import redis.clients.jedis.Jedis;
 
 public interface WithJedis extends WithComponent {
 
-    default Jedis redis() throws ComponentNotFoundException {
+    default Jedis jedis() throws ComponentNotFoundException {
         return getComponent(JedisComponent.class).jedis();
     }
 }
