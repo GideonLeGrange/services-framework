@@ -27,6 +27,8 @@ public class RabbitMqConfig {
     @Max(value = 900, message = "The RabbitMQ retry time must be in the range of 1 to 900 seconds")
     private int retryTime = 10;
 
+    private boolean startOnRequest = false;
+
     public String getUsername() {
         return username;
     }
@@ -83,4 +85,11 @@ public class RabbitMqConfig {
         this.retryTime = retryTime;
     }
 
+    public boolean isStartOnRequest() {
+        return startOnRequest;
+    }
+
+    public void setStartOnRequest(boolean startOnRequest) {
+        this.startOnRequest = startOnRequest;
+    }
 }

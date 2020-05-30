@@ -24,6 +24,7 @@ public final class RabbitMqComponent extends Component<Service, RabbitMqConfig> 
 
     private Connection rabbitMq;
     private Channel channel;
+    private RabbitMqConfig conf;
 
     public RabbitMqComponent(Service service) {
         super(service);
@@ -31,6 +32,13 @@ public final class RabbitMqComponent extends Component<Service, RabbitMqConfig> 
 
     @Override
     public void start(RabbitMqConfig conf) throws ComponentException {
+        this.conf = conf;
+        if (!conf.isStartOnRequest()) {
+            startRabbitMq();
+        }
+    }
+
+    private void startRabbitMq() throws ComponentException {
         boolean connected = false;
         int retries = 0;
         while (!connected) {
@@ -67,8 +75,6 @@ public final class RabbitMqComponent extends Component<Service, RabbitMqConfig> 
                 warning("Could not connect to RabbitMQ server. Retrying in %d seconds", conf.getRetryTime());
                 try {
                     retries++;
-                    if (retries > 3) {
-                    }
                     TimeUnit.SECONDS.sleep(conf.getRetryTime());
                 } catch (InterruptedException ex) {
                 }
@@ -76,11 +82,17 @@ public final class RabbitMqComponent extends Component<Service, RabbitMqConfig> 
         }
     }
 
-    public Connection getConnection() {
+    public Connection getConnection() throws ComponentException {
+        if (rabbitMq == null) {
+            startRabbitMq();
+        }
         return rabbitMq;
     }
 
-    public Channel getChannel() {
+    public Channel getChannel() throws ComponentException {
+        if (rabbitMq == null) {
+            startRabbitMq();
+        }
         return channel;
     }
 
