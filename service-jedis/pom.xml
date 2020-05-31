@@ -10,6 +10,7 @@
     </parent>
     <groupId>me.legrange.services</groupId>
     <artifactId>service-jedis</artifactId>
+    <name>Jedis Integration</name>
     <packaging>jar</packaging>
     <dependencies>
         <dependency>
