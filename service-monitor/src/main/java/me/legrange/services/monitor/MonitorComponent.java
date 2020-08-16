@@ -3,20 +3,15 @@ package me.legrange.services.monitor;
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
-import me.legrange.service.ServiceException;
-import me.legrange.services.jetty.JettyComponent;
+import me.legrange.services.jetty.GsonJerseyProvider;
 import me.legrange.services.jetty.WithJetty;
+
+import java.util.*;
+import java.util.function.Supplier;
 
 import static java.lang.String.format;
 import static me.legrange.log.Log.error;
 import static me.legrange.log.Log.info;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
 
 /**
  * A service component that provides service monitoring.
@@ -35,6 +30,7 @@ public final class MonitorComponent extends Component<Service, MonitorConfig> im
     @Override
     public void start(MonitorConfig config) throws ComponentException {
         instance = this;
+        jetty().addProvider(GsonJerseyProvider.class);
         jetty().addEndpoint(config.getPath(), StateEndpoint.class);
         info("Monitoring available via HTTP on %s", config.getPath());
     }
@@ -42,7 +38,7 @@ public final class MonitorComponent extends Component<Service, MonitorConfig> im
     /**
      * Add a monitor input to the monitor.
      *
-     * @param name The name of the thing we are monitoring
+     * @param name     The name of the thing we are monitoring
      * @param function The function to call when we require monitoring state
      */
     void addMonitor(String name, Supplier<State> function) throws ComponentException {

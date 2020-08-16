@@ -26,7 +26,7 @@ public interface WithLogging extends WithComponent {
      * @param ex The exception
      */
     default void critical(Throwable ex) {
-        Log.critical(ex, ex.getMessage());
+        Log.critical(ex);
     }
 
     /**
@@ -56,7 +56,7 @@ public interface WithLogging extends WithComponent {
      * @param ex The exception
      */
     default void error(Throwable ex) {
-        Log.error(ex, ex.getMessage());
+        Log.error(ex);
     }
 
     /**
@@ -86,7 +86,7 @@ public interface WithLogging extends WithComponent {
      * @param ex The exception
      */
     default void warning(Throwable ex) {
-        Log.warning(ex, ex.getMessage());
+        Log.warning(ex);
     }
 
     /**
