@@ -68,7 +68,6 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         this.config = config;
         try {
             context = makeContext();
-
             if (config.getSsl() != null)  {
                 server = new Server();
                 ServerConnector sslConnector = makeSslConnector();
@@ -158,7 +157,6 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         }
         sslContextFactory.setKeyStorePath(config.getSsl().getKeyStoreFile());
         sslContextFactory.setKeyStorePassword(config.getSsl().getKeyStorePassword());
-//        sslContextFactory.setKeyManagerPassword("123456");
         ServerConnector sslConnector = new ServerConnector(server,
                 new SslConnectionFactory(sslContextFactory, "http/1.1"),
                 new HttpConnectionFactory(https));
