@@ -38,6 +38,7 @@ import org.glassfish.jersey.servlet.ServletContainer;
 
 import static java.lang.String.format;
 import static me.legrange.log.Log.info;
+import static me.legrange.log.Log.warning;
 
 /**
  * A component that adds Jetty HTTP functionality.
@@ -137,7 +138,8 @@ public class JettyComponent extends Component<Service, JettyConfig> {
      */
     private void checkForMessageBodyWriter() throws ComponentException {
         if (jerseyProviders.stream().noneMatch(p -> MessageBodyWriter.class.isAssignableFrom(p))) {
-            throw new ComponentException("No MessageBodyWriters were registered for serialization. Remember to register them using the addProvider methods");
+            addProvider(GsonJerseyProvider.class);
+            warning("No MessageBodyWriters were registered for serialization. Added %s as safety net, but remember to register them using the addProvider methods", GsonJerseyProvider.class.getSimpleName());
         }
     }
 

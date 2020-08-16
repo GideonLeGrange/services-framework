@@ -18,6 +18,7 @@ import org.shredzone.acme4j.util.CSRBuilder;
 import org.shredzone.acme4j.util.KeyPairUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -102,6 +103,7 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
             Account account = createAccount(keyPair, hasAcmeUrl());
             Order order = createOrder(account);
             createCsr(order);
+            downloadCertificate(order);
         } catch (LetsEcryptException ex) {
             error(ex);
         }
@@ -137,10 +139,14 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
      * @param cert The certificate to store
      */
     private void storeToKeyStore(Certificate cert) throws LetsEcryptException {
-        try (OutputStream out = new FileOutputStream(config.getKeyStore().getKeyStoreFile())) {
-            KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+        debug("Storing cert %s to keystore", cert.getLocation());
+        if (!hasFile(config.getKeyStore().getKeyStoreFile())) {
+            createKeyStore();
+        }
+        try{
+           KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+            keystore.load(new FileInputStream(config.getKeyStore().getKeyStoreFile()), config.getKeyStore().getKeyStorePassword().toCharArray());
             keystore.setCertificateEntry(config.getDomain(), cert.getCertificate());
-            keystore.store(out, config.getKeyStore().getKeyStorePassword().toCharArray());
             info("Stored certificate to key store");
         } catch ( IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException e) {
             throw  new LetsEcryptException(format("Error storing certificate to key store (%s)", e.getMessage()),e);
@@ -314,6 +320,17 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
 
     private boolean hasFile(String fileName) {
         return new File(fileName).exists();
+    }
+
+    private void createKeyStore() throws LetsEcryptException {
+        KeyStore keystore = null;
+        try (FileOutputStream out = new FileOutputStream(config.getKeyStore().getKeyStoreFile())){
+            keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+            keystore.load(null);
+            keystore.store(out, config.getKeyStore().getKeyStorePassword().toCharArray());
+        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
+            throw new  LetsEcryptException(format("Cannot create key store (%s)", e.getMessage()),e);
+        }
     }
 
 }
