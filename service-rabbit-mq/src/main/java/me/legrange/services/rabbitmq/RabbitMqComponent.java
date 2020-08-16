@@ -43,7 +43,7 @@ public final class RabbitMqComponent extends Component<Service, RabbitMqConfig> 
         int retries = 0;
         while (!connected) {
             try {
-                info("Connecting to RabbitMQ server");
+                info("Connecting to RabbitMQ server %s", conf.getHostname());
                 ConnectionFactory factory = new ConnectionFactory();
                 factory.setUsername(conf.getUsername());
                 factory.setPassword(conf.getPassword());
@@ -61,18 +61,18 @@ public final class RabbitMqComponent extends Component<Service, RabbitMqConfig> 
                 factory.setAutomaticRecoveryEnabled(true);
                 rabbitMq = factory.newConnection();
                 rabbitMq.addShutdownListener((ShutdownSignalException signal) -> {
-                    warning("RabbitMq shut down. Reason: %s", signal.getMessage());
+                    warning("RabbitMQ connection to %s shut down. Reason: %s", conf.getHostname(), signal.getMessage());
                 });
                 channel = rabbitMq.createChannel();
                 connected = true;
-                info("Connected to RabbitMQ server");
+                info("Connected to RabbitMQ server %s", conf.getHostname());
             } catch (IOException ex) {
-                error(ex, "Error connecting to RabbitMQ server: %s", ex.getMessage());
+                error(ex, "Error connecting to RabbitMQ server %s: %s", conf.getHostname(), ex.getMessage());
             } catch (TimeoutException ex) {
-                error(ex, "Timeout connecting to RabbitMQ server: %s", ex.getMessage());
+                error(ex, "Timeout connecting to RabbitMQ server %s: %s", conf.getHostname(), ex.getMessage());
             }
             if (!connected) {
-                warning("Could not connect to RabbitMQ server. Retrying in %d seconds", conf.getRetryTime());
+                warning("Could not connect to RabbitMQ server %s. Retrying in %d seconds", conf.getHostname(), conf.getRetryTime());
                 try {
                     retries++;
                     TimeUnit.SECONDS.sleep(conf.getRetryTime());
