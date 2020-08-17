@@ -8,26 +8,23 @@ import javax.validation.constraints.Min;
  * @author gideon
  */
 public class JettyConfig {
-    
-    @Min(value=1, message="Jetty port must be between 1 an 65536")
-    @Max(value=65535, message="Jetty port must be between 1 an 65536")
-    private int port;
 
-    private SslConfig ssl;
+    private HttpConfig http;
+    private HttpsConfig https;
 
-    public int getPort() {
-        return port;
+    public HttpConfig getHttp() {
+        return http;
     }
 
-    public void setPort(int port) {
-        this.port = port;
+    public void setHttp(HttpConfig http) {
+        this.http = http;
     }
 
-    public SslConfig getSsl() {
-        return ssl;
+    public HttpsConfig getHttps() {
+        return https;
     }
 
-    public void setSsl(SslConfig ssl) {
-        this.ssl = ssl;
+    public void setHttps(HttpsConfig https) {
+        this.https = https;
     }
 }

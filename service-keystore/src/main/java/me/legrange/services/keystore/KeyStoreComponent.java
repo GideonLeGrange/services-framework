@@ -18,7 +18,7 @@ import java.security.cert.CertificateException;
 import static java.lang.String.format;
 
 /** A component that manages a key store for use by TLS. */
-public class KeyStoreComponent extends Component<Service, KeyStoreConfig> implements WithLogging {
+public final class KeyStoreComponent extends Component<Service, KeyStoreConfig> implements WithLogging {
 
     private KeyStoreConfig config;
     private  KeyStore keyStore;
@@ -52,10 +52,13 @@ public class KeyStoreComponent extends Component<Service, KeyStoreConfig> implem
         }
     }
 
-    KeyStore getKeyStore() {
+    public KeyStore getKeyStore() {
         return keyStore;
     }
 
+    public String getPassword() {
+        return config.getPassword();
+    }
 
     private boolean haveKeyStore() {
         return new File(config.getFileName()).exists();

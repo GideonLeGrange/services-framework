@@ -12,12 +12,20 @@ import java.security.cert.Certificate;
  */
 public interface WithKeyStore extends WithComponent {
 
-    default KeyStore keyStore() throws ComponentNotFoundException {
-        return getComponent(KeyStoreComponent.class).getKeyStore();
+    default KeyStoreComponent keyStore() throws ComponentNotFoundException {
+        return getComponent(KeyStoreComponent.class);
     }
 
     default void storeCertificate(String alias, Certificate certificate) throws StoreException {
         getComponent(KeyStoreComponent.class).storeCertificate(alias, certificate);
+    }
+
+    default KeyStore getKeyStore() {
+        return getComponent(KeyStoreComponent.class).getKeyStore();
+    }
+
+    default String getPassword() {
+        return getComponent(KeyStoreComponent.class).getPassword();
     }
 
 }

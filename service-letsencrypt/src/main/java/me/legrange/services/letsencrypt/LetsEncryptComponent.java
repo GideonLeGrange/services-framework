@@ -3,6 +3,7 @@ package me.legrange.services.letsencrypt;
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
+import me.legrange.services.jetty.JettyComponent;
 import me.legrange.services.jetty.WithJetty;
 import me.legrange.services.keystore.StoreException;
 import me.legrange.services.keystore.WithKeyStore;
@@ -46,7 +47,7 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
     public void start(LetsEncryptConfig config) throws ComponentException {
         this.config = config;
         this.instance = this;
-        jetty().addEndpoint("/.well-known/acme-challenge", ChallengeEndpoint.class);
+        jetty().addEndpoint(JettyComponent.Connector.HTTP, "/.well-known/acme-challenge", ChallengeEndpoint.class);
         if (hasCertificate()) {
             try {
                 activateCertificate();

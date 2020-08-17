@@ -18,12 +18,10 @@ import org.glassfish.jersey.servlet.ServletContainer;
 
 import javax.servlet.DispatcherType;
 import javax.ws.rs.ext.MessageBodyWriter;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import static java.lang.String.format;
 import static me.legrange.log.Log.info;
 import static me.legrange.log.Log.warning;
 
@@ -34,9 +32,15 @@ import static me.legrange.log.Log.warning;
  */
 public class JettyComponent extends Component<Service, JettyConfig> implements WithKeyStore {
 
+    public enum Connector {
+        HTTP,
+        HTTPS;
+    }
+
     private Server server;
     private JettyConfig config;
-    private ServletContextHandler context;
+    private ServletContextHandler httpContext;
+    private ServletContextHandler httpsContext;
     private boolean running = false;
     private final Set<Class> jerseyProviders = new HashSet();
     private final Map<String, Class> endpoints = new HashMap<>();
@@ -55,20 +59,45 @@ public class JettyComponent extends Component<Service, JettyConfig> implements W
     public void start(JettyConfig config) throws ComponentException {
         this.config = config;
         try {
-            context = makeContext();
-            if (config.getSsl() != null)  {
-                server = new Server();
-                ServerConnector sslConnector = makeSslConnector();
-                server.setConnectors(new ServerConnector[]{sslConnector});
+            server = new Server();
+            List<ServerConnector> connectors = new ArrayList();
+            if (config.getHttp() != null) {
+                connectors.add(makePlainConnector());
+                httpContext = makeContext("http");
+
             }
-            else {
-                server = new Server(config.getPort());
+            if (config.getHttps() != null) {
+                connectors.add(makeSslConnector());
+                ServerConnector serverConnector = makePlainConnector();
+                httpsContext = makeContext("https");
             }
-            server.setHandler(context);
+            if (connectors.isEmpty()) {
+                throw new JettyException("Neither HTTP nor HTTP are configured. At least one needs to be configured");
+            }
+            server.setConnectors(connectors.toArray(new ServerConnector[]{}));
+            if (httpContext != null) {
+                server.setHandler(httpContext);
+            }
+            if (httpsContext != null) {
+                server.setHandler(httpsContext);
+            }
             server.start();
-            info("Started Jetty server on port %d", config.getPort());
+            info("Started Jetty server on %s", connectors.stream().map( c-> c.getPort()).collect(Collectors.toList()));
         } catch (Exception ex) {
             throw new ComponentException(ex.getMessage(), ex);
+        }
+    }
+
+    public void addEndpoint(Connector connector, String path, Class endpoint) throws JettyException {
+        switch (connector) {
+            case HTTP:
+                addEndpoint(httpContext, path, endpoint);
+                break;
+            case HTTPS:
+                addEndpoint(httpsContext, path, endpoint);
+                break;
+            default:
+                throw new JettyException(format("Unsupported endpoint connector '%s'. BUG!", connector));
         }
     }
 
@@ -78,7 +107,37 @@ public class JettyComponent extends Component<Service, JettyConfig> implements W
      * @param path     The path
      * @param endpoint The endpoint class
      */
-    public void addEndpoint(String path, Class endpoint) throws ComponentException {
+    public void addEndpoint(String path, Class endpoint) throws JettyException {
+        addEndpoint(Connector.HTTP, path, endpoint);
+        addEndpoint(Connector.HTTPS, path, endpoint);
+    }
+
+    public void addProvider(Class provider) throws JettyException {
+        jerseyProviders.add(provider);
+        if (running) {
+            info("Re-adding %d endpoint(s) because of provider change", endpoints.size());
+            try {
+                server.stop();
+                if (httpContext !=null) {
+                    httpContext = makeContext("http");
+                    server.setHandler(httpContext);
+                }
+                if (httpsContext !=null) {
+                    httpsContext = makeContext("https");
+                    server.setHandler(httpsContext);
+                }
+                server.start();
+            }
+            catch (Exception ex) {
+                throw new JettyException(ex.getMessage(), ex);
+            }
+            for (Map.Entry<String, Class> pair : endpoints.entrySet()) {
+                addEndpoint(pair.getKey(), pair.getValue());
+            }
+        }
+    }
+
+    private void addEndpoint(ServletContextHandler context, String path, Class endpoint) throws JettyException {
         ResourceConfig rc = new ResourceConfig(endpoint);
         checkForMessageBodyWriter();
         for (Class provider : jerseyProviders) {
@@ -89,51 +148,32 @@ public class JettyComponent extends Component<Service, JettyConfig> implements W
         try {
             context.start();
         } catch (Exception ex) {
-            throw new ComponentException(ex.getMessage(), ex);
+            throw new JettyException(ex.getMessage(), ex);
         }
         if (endpoints.containsKey(path)) {
             info("Re-added endpoint of type '%s' on '%s'", endpoint.getSimpleName(), path);
-        }
-        else {
+        } else {
             info("Added new endpoint of type '%s' on '%s'", endpoint.getSimpleName(), path);
             endpoints.put(path, endpoint);
         }
         running = true;
     }
 
-    public void addProvider(Class provider) throws ComponentException {
-        jerseyProviders.add(provider);
-        if (running) {
-            info("Re-adding %d endpoint(s) because of provider change", endpoints.size());
-            context = makeContext();
-            try {
-                server.stop();
-                server.setHandler(context);
-                server.start();
-            }
-            catch (Exception ex) {
-                throw new ComponentException(ex.getMessage(), ex);
-            }
-            for (Map.Entry<String, Class> pair : endpoints.entrySet()) {
-                addEndpoint(pair.getKey(), pair.getValue());
-            }
-        }
-    }
-
     /**
      * Check for a MessageBodyWriter
      */
-    private void checkForMessageBodyWriter() throws ComponentException {
+    private void checkForMessageBodyWriter() throws JettyException {
         if (jerseyProviders.stream().noneMatch(p -> MessageBodyWriter.class.isAssignableFrom(p))) {
             addProvider(GsonJerseyProvider.class);
             warning("No MessageBodyWriters were registered for serialization. Added %s as safety net, but remember to register them using the addProvider methods", GsonJerseyProvider.class.getSimpleName());
         }
     }
 
-    private ServletContextHandler makeContext() {
-        context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+    private ServletContextHandler makeContext(String name) {
+        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
         context.addFilter(ErrorFilter.class, "/*", EnumSet.allOf(DispatcherType.class));
+        context.setVirtualHosts(new String[]{"@" + name});
         return context;
     }
 
@@ -141,17 +181,27 @@ public class JettyComponent extends Component<Service, JettyConfig> implements W
         HttpConfiguration https = new HttpConfiguration();
         https.addCustomizer(new SecureRequestCustomizer());
         SslContextFactory sslContextFactory = new SslContextFactory.Server();
-        sslContextFactory.setKeyStore(keyStore());
-//        sslContextFactory.setKeyStorePath("/tmp/ssl/keystore");
-//        sslContextFactory.setKeyStorePassword("12345678");
-//        sslContextFactory.setKeyManagerPassword("12345678");
-        sslContextFactory.setCertAlias(config.getSsl().getDomain());
-        sslContextFactory.setValidateCerts(false);
-        ServerConnector sslConnector = new ServerConnector(server,
+        sslContextFactory.setKeyStore(keyStore().getKeyStore());
+        sslContextFactory.setKeyStorePassword(keyStore().getPassword());
+        sslContextFactory.setKeyManagerPassword(keyStore().getPassword());
+        ServerConnector connector = new ServerConnector(server,
                 new SslConnectionFactory(sslContextFactory, "http/1.1"),
                 new HttpConnectionFactory(https));
-        sslConnector.setPort(config.getPort());
-        return sslConnector;
+        connector.setPort(config.getHttps().getPort());
+        connector.setName("https");
+
+        return connector;
+    }
+
+    private ServerConnector makePlainConnector() throws ComponentException {
+        HttpConfiguration https = new HttpConfiguration();
+        SslContextFactory sslContextFactory = new SslContextFactory.Server();
+        ServerConnector connector = new ServerConnector(server,
+                new SslConnectionFactory(sslContextFactory, "http/1.1"),
+                new HttpConnectionFactory(https));
+        connector.setPort(config.getHttp().getPort());
+        connector.setName("http");
+        return connector;
     }
 
 }
