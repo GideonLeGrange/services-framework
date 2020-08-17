@@ -196,9 +196,7 @@ public class JettyComponent extends Component<Service, JettyConfig> implements W
     private ServerConnector makePlainConnector() throws ComponentException {
         HttpConfiguration https = new HttpConfiguration();
         SslContextFactory sslContextFactory = new SslContextFactory.Server();
-        ServerConnector connector = new ServerConnector(server,
-                new SslConnectionFactory(sslContextFactory, "http/1.1"),
-                new HttpConnectionFactory(https));
+        ServerConnector connector = new ServerConnector(server);
         connector.setPort(config.getHttp().getPort());
         connector.setName("http");
         return connector;
