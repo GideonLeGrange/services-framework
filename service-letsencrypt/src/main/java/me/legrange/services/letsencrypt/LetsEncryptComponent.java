@@ -4,6 +4,8 @@ import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
 import me.legrange.services.jetty.WithJetty;
+import me.legrange.services.keystore.StoreException;
+import me.legrange.services.keystore.WithKeyStore;
 import me.legrange.services.logging.WithLogging;
 import org.shredzone.acme4j.Account;
 import org.shredzone.acme4j.AccountBuilder;
@@ -18,30 +20,23 @@ import org.shredzone.acme4j.util.CSRBuilder;
 import org.shredzone.acme4j.util.KeyPairUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.security.KeyPair;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
-import static me.legrange.log.Log.debug;
 
-public final class LetsEncryptComponent extends Component<Service, LetsEncryptConfig> implements WithJetty, WithLogging {
+public final class LetsEncryptComponent extends Component<Service, LetsEncryptConfig> implements WithJetty, WithKeyStore, WithLogging {
 
     private static LetsEncryptComponent instance;
     private LetsEncryptConfig config;
-    private Map<String, String> challengeResponses = new ConcurrentHashMap();
+    private final Map<String, String> challengeResponses = new ConcurrentHashMap();
 
     public LetsEncryptComponent(Service service) {
         super(service);
@@ -91,7 +86,7 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
         debug("obtainCertificate()");
         try {
             try {
-                TimeUnit.SECONDS.sleep(10);
+                TimeUnit.SECONDS.sleep(5);
             } catch (InterruptedException e) {
             }
             KeyPair keyPair;
@@ -125,31 +120,14 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
                 order.update();
             }
             Certificate cert = order.getCertificate();
-            try (FileWriter fw = new FileWriter(getCertificateFileName())) {
-                cert.writeCertificate(fw);
+            for (X509Certificate c : cert.getCertificateChain()) {
+                debug("Storing %s from chain", c.getSubjectDN().getName());
+                storeCertificate(c.getSubjectDN().getName(), cert.getCertificate());
             }
-            storeToKeyStore(cert);
-        } catch (AcmeException | IOException ex) {
+        } catch (AcmeException ex) {
             throw new LetsEcryptException(format("Error downloading certificate for '%s' (%s)", config.getDomain(), ex.getMessage()));
-        }
-    }
-
-    /** Store a certificate to the key store.
-     *
-     * @param cert The certificate to store
-     */
-    private void storeToKeyStore(Certificate cert) throws LetsEcryptException {
-        debug("Storing cert %s to keystore", cert.getLocation());
-        if (!hasFile(config.getKeyStore().getKeyStoreFile())) {
-            createKeyStore();
-        }
-        try{
-           KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-            keystore.load(new FileInputStream(config.getKeyStore().getKeyStoreFile()), config.getKeyStore().getKeyStorePassword().toCharArray());
-            keystore.setCertificateEntry(config.getDomain(), cert.getCertificate());
-            info("Stored certificate to key store");
-        } catch ( IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException e) {
-            throw  new LetsEcryptException(format("Error storing certificate to key store (%s)", e.getMessage()),e);
+        } catch (StoreException e) {
+            throw new LetsEcryptException(e.getMessage(), e);
         }
     }
 
@@ -168,8 +146,8 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
         byte[] csr;
         try {
             csrb.sign(domainKeyPair);
-            csr = csrb.getEncoded();
             csrb.write(new FileWriter(getCertificateFileName()));
+            csr = csrb.getEncoded();
             order.execute(csr);
         } catch (IOException | AcmeException ex) {
             throw new LetsEcryptException(format("Error creating certificate for '%s' (%s)", config.getDomain(), ex.getMessage()), ex);
@@ -322,15 +300,5 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
         return new File(fileName).exists();
     }
 
-    private void createKeyStore() throws LetsEcryptException {
-        KeyStore keystore = null;
-        try (FileOutputStream out = new FileOutputStream(config.getKeyStore().getKeyStoreFile())){
-            keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-            keystore.load(null);
-            keystore.store(out, config.getKeyStore().getKeyStorePassword().toCharArray());
-        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
-            throw new  LetsEcryptException(format("Cannot create key store (%s)", e.getMessage()),e);
-        }
-    }
 
 }

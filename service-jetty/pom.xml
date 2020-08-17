@@ -71,6 +71,12 @@
             <version>2.8.6</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>me.legrange.services</groupId>
+            <artifactId>service-keystore</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
     <name>Jetty Web Server Integration</name>
 </project>

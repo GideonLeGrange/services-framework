@@ -1,29 +1,9 @@
 package me.legrange.services.jetty;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringJoiner;
-import javax.net.ssl.X509ExtendedKeyManager;
-import javax.servlet.DispatcherType;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.ws.rs.ext.MessageBodyWriter;
-
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
+import me.legrange.services.keystore.WithKeyStore;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
@@ -36,7 +16,14 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 
-import static java.lang.String.format;
+import javax.servlet.DispatcherType;
+import javax.ws.rs.ext.MessageBodyWriter;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import static me.legrange.log.Log.info;
 import static me.legrange.log.Log.warning;
 
@@ -45,7 +32,7 @@ import static me.legrange.log.Log.warning;
  *
  * @author gideon
  */
-public class JettyComponent extends Component<Service, JettyConfig> {
+public class JettyComponent extends Component<Service, JettyConfig> implements WithKeyStore {
 
     private Server server;
     private JettyConfig config;
@@ -153,12 +140,13 @@ public class JettyComponent extends Component<Service, JettyConfig> {
     private ServerConnector makeSslConnector() throws ComponentException {
         HttpConfiguration https = new HttpConfiguration();
         https.addCustomizer(new SecureRequestCustomizer());
-        SslContextFactory sslContextFactory = new SslContextFactory();
-        if (!keyStoreExists()) {
-            createKeyStore();
-        }
-        sslContextFactory.setKeyStorePath(config.getSsl().getKeyStoreFile());
-        sslContextFactory.setKeyStorePassword(config.getSsl().getKeyStorePassword());
+        SslContextFactory sslContextFactory = new SslContextFactory.Server();
+        sslContextFactory.setKeyStore(keyStore());
+//        sslContextFactory.setKeyStorePath("/tmp/ssl/keystore");
+//        sslContextFactory.setKeyStorePassword("12345678");
+//        sslContextFactory.setKeyManagerPassword("12345678");
+        sslContextFactory.setCertAlias(config.getSsl().getDomain());
+        sslContextFactory.setValidateCerts(false);
         ServerConnector sslConnector = new ServerConnector(server,
                 new SslConnectionFactory(sslContextFactory, "http/1.1"),
                 new HttpConnectionFactory(https));
@@ -166,18 +154,4 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         return sslConnector;
     }
 
-    private boolean keyStoreExists() {
-        return new File(config.getSsl().getKeyStoreFile()).exists();
-    }
-
-    private void createKeyStore() throws ComponentException {
-        KeyStore keystore = null;
-        try (FileOutputStream out = new FileOutputStream(config.getSsl().getKeyStoreFile())){
-            keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-            keystore.load(null);
-            keystore.store(out, config.getSsl().getKeyStorePassword().toCharArray());
-        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
-            throw new  ComponentException(format("Cannot create key store (%s)", e.getMessage()),e);
-        }
-    }
 }

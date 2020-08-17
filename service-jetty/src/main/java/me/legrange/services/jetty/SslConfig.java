@@ -8,6 +8,8 @@ public class SslConfig  {
     private String keyStoreFile;
     @NotBlank(message = "The SSL key store password must be specified")
     private String keyStorePassword;
+    @NotBlank(message = "The domain we're serving")
+    private String domain;
 
     public String getKeyStoreFile() {
         return keyStoreFile;
@@ -23,5 +25,13 @@ public class SslConfig  {
 
     public void setKeyStorePassword(String keyStorePassword) {
         this.keyStorePassword = keyStorePassword;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 }

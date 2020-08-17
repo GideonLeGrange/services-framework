@@ -8,4 +8,5 @@ import me.legrange.service.WithComponent;
  */
 public interface WithLetsEncrypt extends WithComponent {
 
+
 }

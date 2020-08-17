@@ -9,6 +9,7 @@
     <modules>
         <module>service-server</module>
         <module>service-logging</module>
+        <module>service-keystore</module>
         <module>service-jetty</module>
         <module>service-rabbit-mq</module>
         <module>service-monitor</module>
