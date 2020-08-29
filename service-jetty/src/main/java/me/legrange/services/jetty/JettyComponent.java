@@ -10,6 +10,7 @@ import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
+import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -75,12 +76,14 @@ public class JettyComponent extends Component<Service, JettyConfig> implements W
                 throw new JettyException("Neither HTTP nor HTTP are configured. At least one needs to be configured");
             }
             server.setConnectors(connectors.toArray(new ServerConnector[]{}));
+            HandlerCollection handlers = new HandlerCollection();
             if (httpContext != null) {
-                server.setHandler(httpContext);
+                handlers.addHandler(httpContext);
             }
             if (httpsContext != null) {
-                server.setHandler(httpsContext);
+                handlers.addHandler(httpsContext);
             }
+            server.setHandler(handlers);
             server.start();
             info("Started Jetty server on %s", connectors.stream().map( c-> c.getPort()).collect(Collectors.toList()));
         } catch (Exception ex) {
@@ -117,15 +120,17 @@ public class JettyComponent extends Component<Service, JettyConfig> implements W
         if (running) {
             info("Re-adding %d endpoint(s) because of provider change", endpoints.size());
             try {
-                server.stop();
+                HandlerCollection handlers = new HandlerCollection();
                 if (httpContext !=null) {
                     httpContext = makeContext("http");
-                    server.setHandler(httpContext);
+                    handlers.addHandler(httpContext);
                 }
                 if (httpsContext !=null) {
                     httpsContext = makeContext("https");
-                    server.setHandler(httpsContext);
+                    handlers.addHandler(httpsContext);
                 }
+                server.stop();
+                server.setHandler(handlers);
                 server.start();
             }
             catch (Exception ex) {
