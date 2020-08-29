@@ -9,9 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 
@@ -94,5 +92,14 @@ public final class KeyStoreComponent extends Component<Service, KeyStoreConfig> 
             throw new StoreException(format("Cannot update key store %s (%s)", config.getFileName(), e.getMessage()),e);
         }
     }
+
+    public boolean hasAlias(String alias) throws StoreException {
+        try {
+        return keyStore.containsAlias(alias);
+    } catch (KeyStoreException e) {
+        throw new StoreException(format("Cannot read alias %s from key store (%s)", alias, e.getMessage()),e);
+    }
+
+}
 
 }
