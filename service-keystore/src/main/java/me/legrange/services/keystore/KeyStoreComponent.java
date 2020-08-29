@@ -15,11 +15,13 @@ import java.security.cert.CertificateException;
 
 import static java.lang.String.format;
 
-/** A component that manages a key store for use by TLS. */
+/**
+ * A component that manages a key store for use by TLS.
+ */
 public final class KeyStoreComponent extends Component<Service, KeyStoreConfig> implements WithLogging {
 
     private KeyStoreConfig config;
-    private  KeyStore keyStore;
+    private KeyStore keyStore;
 
     public KeyStoreComponent(Service service) {
         super(service);
@@ -30,8 +32,7 @@ public final class KeyStoreComponent extends Component<Service, KeyStoreConfig> 
         this.config = config;
         if (haveKeyStore()) {
             loadKeyStore();
-        }
-        else {
+        } else {
             createKeyStore();
         }
     }
@@ -46,7 +47,16 @@ public final class KeyStoreComponent extends Component<Service, KeyStoreConfig> 
             keyStore.setCertificateEntry(alias, cert);
             saveKeyStore();
         } catch (KeyStoreException e) {
-            throw new StoreException(format("Error storing certificate '%s' (%s)", alias, e.getMessage()),e);
+            throw new StoreException(format("Error storing certificate '%s' (%s)", alias, e.getMessage()), e);
+        }
+    }
+
+    public void storeKey(String alias, PrivateKey key, Certificate[] chain) throws StoreException {
+        try {
+            keyStore.setKeyEntry(alias, key, getPassword().toCharArray(), chain);
+            saveKeyStore();
+        } catch (KeyStoreException ex) {
+            throw new StoreException(format("Error storing key '%s' (%s)", alias, ex.getMessage()), ex);
         }
     }
 
@@ -64,42 +74,42 @@ public final class KeyStoreComponent extends Component<Service, KeyStoreConfig> 
 
     private void createKeyStore() throws StoreException {
         keyStore = null;
-        try (FileOutputStream out = new FileOutputStream(config.getFileName())){
+        try (FileOutputStream out = new FileOutputStream(config.getFileName())) {
             keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
             keyStore.load(null, config.getPassword().toCharArray());
             keyStore.store(out, config.getPassword().toCharArray());
             info("Created new key store %s", config.getFileName());
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
-            throw new StoreException(format("Cannot create key store %s (%s)", config.getFileName(), e.getMessage()),e);
+            throw new StoreException(format("Cannot create key store %s (%s)", config.getFileName(), e.getMessage()), e);
         }
     }
 
     private void loadKeyStore() throws StoreException {
-        try{
+        try {
             keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
             keyStore.load(new FileInputStream(config.getFileName()), config.getPassword().toCharArray());
             info("Loaded existing key store from %s", config.getFileName());
-        } catch ( IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException e) {
-            throw  new StoreException(format("Error loading key store %s (%s)",  config.getFileName(), e.getMessage()),e);
+        } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException e) {
+            throw new StoreException(format("Error loading key store %s (%s)", config.getFileName(), e.getMessage()), e);
         }
     }
 
     private void saveKeyStore() throws StoreException {
-        try (FileOutputStream out = new FileOutputStream(config.getFileName())){
+        try (FileOutputStream out = new FileOutputStream(config.getFileName())) {
             keyStore.store(out, config.getPassword().toCharArray());
             info("Updated key store %s", config.getFileName());
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
-            throw new StoreException(format("Cannot update key store %s (%s)", config.getFileName(), e.getMessage()),e);
+            throw new StoreException(format("Cannot update key store %s (%s)", config.getFileName(), e.getMessage()), e);
         }
     }
 
     public boolean hasAlias(String alias) throws StoreException {
         try {
-        return keyStore.containsAlias(alias);
-    } catch (KeyStoreException e) {
-        throw new StoreException(format("Cannot read alias %s from key store (%s)", alias, e.getMessage()),e);
-    }
+            return keyStore.containsAlias(alias);
+        } catch (KeyStoreException e) {
+            throw new StoreException(format("Cannot read alias %s from key store (%s)", alias, e.getMessage()), e);
+        }
 
-}
+    }
 
 }

@@ -8,15 +8,18 @@ import me.legrange.services.jetty.WithJetty;
 import me.legrange.services.keystore.StoreException;
 import me.legrange.services.keystore.WithKeyStore;
 import me.legrange.services.logging.WithLogging;
-import org.shredzone.acme4j.*;
+import org.shredzone.acme4j.Account;
+import org.shredzone.acme4j.AccountBuilder;
+import org.shredzone.acme4j.Authorization;
+import org.shredzone.acme4j.Certificate;
+import org.shredzone.acme4j.Order;
+import org.shredzone.acme4j.Session;
+import org.shredzone.acme4j.Status;
 import org.shredzone.acme4j.challenge.Http01Challenge;
 import org.shredzone.acme4j.exception.AcmeException;
 import org.shredzone.acme4j.util.CSRBuilder;
 import org.shredzone.acme4j.util.KeyPairUtils;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.KeyStoreException;
@@ -24,7 +27,12 @@ import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -33,7 +41,6 @@ import static java.lang.String.format;
 public final class LetsEncryptComponent extends Component<Service, LetsEncryptConfig> implements WithJetty, WithKeyStore, WithLogging {
 
     private static final int MIN_EXPIRY_DAYS = 180;
-    private static final String LETS_ENCRYPT_KEY_NAME = "Jetty Lets's Encrypt Key";
     private static LetsEncryptComponent instance;
     private LetsEncryptConfig config;
     private final Map<String, String> challengeResponses = new ConcurrentHashMap();
@@ -82,18 +89,26 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
                 TimeUnit.SECONDS.sleep(5);
             } catch (InterruptedException e) {
             }
-            KeyPair keyPair;
-            if (!hasKeys()) {
-                keyPair = obtainKeys();
-            } else {
-                keyPair = loadKeys();
-            }
-            Account account = createAccount(keyPair, hasAcmeUrl());
+            KeyPair keyPair = obtainKeys();
+            Account account = getAccount(keyPair);
             Order order = createOrder(account);
             createCsr(order);
-            downloadCertificate(order);
+            Certificate cert = downloadCertificate(order);
+            List<X509Certificate> chain = cert.getCertificateChain();
+            for (X509Certificate c :chain) {
+                debug("Storing %s from chain", c.getSubjectDN().getName());
+                String alias = c.getSubjectDN().getName();
+                if (alias.endsWith(config.getDomain())) {
+                    alias = "jetty";
+                }
+                storeCertificate(alias, c);
+            }
+            storeKey("jetty", keyPair.getPrivate(), chain);
+
         } catch (LetsEcryptException ex) {
             error(ex);
+        } catch (StoreException e) {
+            error(e);
         }
     }
 
@@ -102,7 +117,7 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
      *
      * @param order The order to use
      */
-    private void downloadCertificate(Order order) throws LetsEcryptException {
+    private Certificate downloadCertificate(Order order) throws LetsEcryptException {
         debug("downloadCertificate()");
         try {
             while (order.getStatus() != Status.VALID) {
@@ -113,14 +128,9 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
                 order.update();
             }
             Certificate cert = order.getCertificate();
-            for (X509Certificate c : cert.getCertificateChain()) {
-                debug("Storing %s from chain", c.getSubjectDN().getName());
-                storeCertificate(c.getSubjectDN().getName(), c);
-            }
+            return cert;
         } catch (AcmeException ex) {
             throw new LetsEcryptException(format("Error downloading certificate for '%s' (%s)", config.getDomain(), ex.getMessage()));
-        } catch (StoreException e) {
-            throw new LetsEcryptException(e.getMessage(), e);
         }
     }
 
@@ -136,11 +146,15 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
         KeyPair domainKeyPair = KeyPairUtils.createKeyPair(2048);
         CSRBuilder csrb = new CSRBuilder();
         csrb.addDomain(config.getDomain());
-        csrb.setOrganization(config.getOrganization());
+        IssuerConfig issuer = config.getIssuer();
+        csrb.setOrganization(issuer.getOrganization());
+        csrb.setCountry(issuer.getCountry());
+        csrb.setLocality(issuer.getLocality());
+        csrb.setState(issuer.getState());
+        csrb.setOrganizationalUnit(issuer.getOrganizationalUnit());
         byte[] csr;
         try {
             csrb.sign(domainKeyPair);
-            //  csrb.write(new FileWriter(getCertificateFileName()));
             csr = csrb.getEncoded();
             order.execute(csr);
         } catch (IOException | AcmeException ex) {
@@ -188,24 +202,14 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
      * @return The account
      * @throws LetsEcryptException
      */
-    private Account createAccount(KeyPair keyPair, boolean onlyExisting) throws LetsEcryptException {
+    private Account getAccount(KeyPair keyPair) throws LetsEcryptException {
         debug("createAccount()");
-        Session session = new Session(config.getLetsEncryptUrl());
         try {
-            AccountBuilder builder = new AccountBuilder();
-            builder = (onlyExisting) ? builder.onlyExisting() : builder;
-            Account account = builder
+            Session session = new Session(config.getLetsEncryptUrl());
+            return new AccountBuilder()
                     .useKeyPair(keyPair)
                     .agreeToTermsOfService()
                     .create(session);
-            if (!onlyExisting) {
-                try (FileWriter out = new FileWriter(getUrlFileName())) {
-                    out.write(account.getLocation().toString());
-                } catch (IOException e) {
-                    throw new LetsEcryptException(format("Error storing account in %s (%s)", getUrlFileName(), e.getMessage()), e);
-                }
-            }
-            return account;
         } catch (AcmeException e) {
             throw new LetsEcryptException(format("Error creating account on %s (%s)", config.getLetsEncryptUrl(), e.getMessage()), e);
         }
@@ -216,22 +220,7 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
      */
     private KeyPair obtainKeys() throws LetsEcryptException {
         debug("obtainKeys()");
-        KeyPair accountKeyPair = KeyPairUtils.createKeyPair(2048);
-        try (FileWriter fw = new FileWriter(getKeyFileName())) {
-            KeyPairUtils.writeKeyPair(accountKeyPair, fw);
-        } catch (IOException e) {
-            throw new LetsEcryptException(format("Error writing key pair to file '%s' (%s)", getKeyFileName(), e.getMessage()), e);
-        }
-        return accountKeyPair;
-    }
-
-    private KeyPair loadKeys() throws LetsEcryptException {
-        debug("loadKeys()");
-        try {
-            return KeyPairUtils.readKeyPair(new FileReader(getKeyFileName()));
-        } catch (IOException e) {
-            throw new LetsEcryptException(format("Error loading key pair from file '%s' (%s)", getKeyFileName(), e.getMessage()), e);
-        }
+        return KeyPairUtils.createKeyPair(2048);
     }
 
     /**
@@ -267,30 +256,13 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
     }
 
     /**
-     * Determine if Let's Encrypt keys exist
-     */
-    private boolean hasKeys() throws LetsEcryptException {
-        try {
-            return keyStore().hasAlias(LETS_ENCRYPT_KEY_NAME);
-        } catch (StoreException ex) {
-            throw new LetsEcryptException(ex.getMessage(), ex);
-        }
-    }
-
-    /**
-     * Determine if a url exists for the Let's Encrypt account being served.
-     */
-    private boolean hasAcmeUrl() {
-        return hasFile(getUrlFileName());
-    }
-
-    /**
      * Determine if a certificate exists for the domain being served.
      */
     private boolean hasCertificate() throws LetsEcryptException {
         debug("hasCertificate()");
         try {
-            String alias = makeAlias(config.getDomain());
+//            String alias = makeAlias(config.getDomain());
+            String alias = "jetty";
             if (keyStore().getKeyStore().containsAlias(alias)) {
                 X509Certificate cert = getCertificate(config.getDomain());
                 return cert.getNotAfter().after(new Date());
@@ -301,49 +273,17 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
         }
     }
 
-    /**
-     * Make the url file name
-     */
-    private String getUrlFileName() {
-        return format("%s/acme.url", config.getDataDirectory());
-    }
-
-    /**
-     * Make the CSR file name
-     */
-    private String getCsrFileName() {
-        return format("%s/%s.csr", config.getDataDirectory(), config.getDomain());
-    }
-
-    /**
-     * Make the certificate file name
-     */
-    private String getCertificateFileName() {
-        return format("%s/%s.crt", config.getDataDirectory(), config.getDomain());
-    }
-
-    /**
-     * Make the key file name
-     */
-    private String getKeyFileName() {
-        return format("%s/letsencrypt.pem", config.getDataDirectory());
-    }
-
-    private boolean hasFile(String fileName) {
-        return new File(fileName).exists();
-    }
-
     private X509Certificate getCertificate(String domain) throws LetsEcryptException {
         try {
-            return (X509Certificate) keyStore().getKeyStore().getCertificate(makeAlias(domain));
+            return (X509Certificate) keyStore().getKeyStore().getCertificate("jetty");
         } catch (KeyStoreException e) {
             throw new LetsEcryptException(format("Error reading certificate for '%s' from key store (%s)",
                     domain, e.getMessage()), e);
         }
     }
 
-    private String makeAlias(String domain) {
-        return format("CN=%s", domain);
-    }
+//    private String makeAlias(String domain) {
+//        return format("CN=%s", domain);
+//    }
 
 }

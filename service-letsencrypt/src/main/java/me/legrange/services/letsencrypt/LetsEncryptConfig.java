@@ -6,21 +6,21 @@ import javax.validation.constraints.NotNull;
 
 public class LetsEncryptConfig {
 
-    @NotBlank(message = "The Let's Encrypt data directory needs to be specified")
-    private String dataDirectory;
     @NotBlank(message = "The domain for which to manage certificates")
     private String domain;
     @NotBlank(message = "The Let's Encrypt URL must be specified")
-    private String letsEncryptUrl = "acme://letsencrypt.org/staging";
-    @NotBlank(message = "The organizartion name to use in certificates")
-    private String organization;
+    private String letsEncryptUrl = "https://acme-staging-v02.api.letsencrypt.org/directory";
+//    private String letsEncryptUrl = "https://acme-v02.api.letsencrypt.org/directory";
 
-    public String getDataDirectory() {
-        return dataDirectory;
+    @NotNull(message = "The certificate issuer must be specified")
+    private IssuerConfig issuer;
+
+    public IssuerConfig getIssuer() {
+        return issuer;
     }
 
-    public void setDataDirectory(String dataDirectory) {
-        this.dataDirectory = dataDirectory;
+    public void setIssuer(IssuerConfig issuer) {
+        this.issuer = issuer;
     }
 
     public String getDomain() {
@@ -39,12 +39,5 @@ public class LetsEncryptConfig {
         this.letsEncryptUrl = letsEncryptUrl;
     }
 
-    public String getOrganization() {
-        return organization;
-    }
-
-    public void setOrganization(String organization) {
-        this.organization = organization;
-    }
 
 }

@@ -189,6 +189,7 @@ public class JettyComponent extends Component<Service, JettyConfig> implements W
         sslContextFactory.setKeyStore(keyStore().getKeyStore());
         sslContextFactory.setKeyStorePassword(keyStore().getPassword());
         sslContextFactory.setKeyManagerPassword(keyStore().getPassword());
+//        sslContextFactory.setCertAlias("cn=56cloetenberg.dsl24.co.za");
         ServerConnector connector = new ServerConnector(server,
                 new SslConnectionFactory(sslContextFactory, "http/1.1"),
                 new HttpConnectionFactory(https));
