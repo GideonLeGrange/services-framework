@@ -4,6 +4,7 @@ import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
 import me.legrange.services.keystore.WithKeyStore;
+import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
@@ -19,7 +20,13 @@ import org.glassfish.jersey.servlet.ServletContainer;
 
 import javax.servlet.DispatcherType;
 import javax.ws.rs.ext.MessageBodyWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -85,7 +92,7 @@ public class JettyComponent extends Component<Service, JettyConfig> implements W
             }
             server.setHandler(handlers);
             server.start();
-            info("Started Jetty server on %s", connectors.stream().map( c-> c.getPort()).collect(Collectors.toList()));
+            info("Started Jetty server on %s", connectors.stream().map(c -> c.getPort()).collect(Collectors.toList()));
         } catch (Exception ex) {
             throw new ComponentException(ex.getMessage(), ex);
         }
@@ -121,19 +128,18 @@ public class JettyComponent extends Component<Service, JettyConfig> implements W
             info("Re-adding %d endpoint(s) because of provider change", endpoints.size());
             try {
                 HandlerCollection handlers = new HandlerCollection();
-                if (httpContext !=null) {
+                if (httpContext != null) {
                     httpContext = makeContext("http");
                     handlers.addHandler(httpContext);
                 }
-                if (httpsContext !=null) {
+                if (httpsContext != null) {
                     httpsContext = makeContext("https");
                     handlers.addHandler(httpsContext);
                 }
                 server.stop();
                 server.setHandler(handlers);
                 server.start();
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 throw new JettyException(ex.getMessage(), ex);
             }
             for (Map.Entry<String, Class> pair : endpoints.entrySet()) {
@@ -185,17 +191,26 @@ public class JettyComponent extends Component<Service, JettyConfig> implements W
     private ServerConnector makeSslConnector() throws ComponentException {
         HttpConfiguration https = new HttpConfiguration();
         https.addCustomizer(new SecureRequestCustomizer());
+        https.setSecureScheme("https");
+        https.setSendServerVersion(true);
+        https.setSendDateHeader(false);
+        https.setSecurePort(config.getHttps().getPort());
+
         SslContextFactory sslContextFactory = new SslContextFactory.Server();
-        sslContextFactory.setKeyStore(keyStore().getKeyStore());
-        sslContextFactory.setKeyStorePassword(keyStore().getPassword());
-        sslContextFactory.setKeyManagerPassword(keyStore().getPassword());
-//        sslContextFactory.setCertAlias("cn=56cloetenberg.dsl24.co.za");
+        sslContextFactory.setKeyStore(getKeyStore());
+        sslContextFactory.setKeyStorePassword(getPassword());
+        sslContextFactory.setKeyManagerPassword(getPassword());
+        sslContextFactory.setTrustStore(getKeyStore());
+        sslContextFactory.setTrustStorePassword(getPassword());
+        String alias = config.getHttps().getAlias();
+        if ((alias != null) && !alias.isEmpty()) {
+            sslContextFactory.setCertAlias(alias);
+        }
         ServerConnector connector = new ServerConnector(server,
-                new SslConnectionFactory(sslContextFactory, "http/1.1"),
+                new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
                 new HttpConnectionFactory(https));
         connector.setPort(config.getHttps().getPort());
         connector.setName("https");
-
         return connector;
     }
 
