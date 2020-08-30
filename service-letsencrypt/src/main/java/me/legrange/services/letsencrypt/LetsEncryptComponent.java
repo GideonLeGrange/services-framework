@@ -23,13 +23,11 @@ import org.shredzone.acme4j.util.KeyPairUtils;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.KeyStoreException;
-import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Timer;
@@ -95,12 +93,7 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
             Order order = createOrder(account);
             createCsr(order);
             Certificate cert = downloadCertificate(order);
-//            storeCertificate(config.getDomain(), cert.getCertificate());
-//            storeKey(config.getDomain(), keyPair.getPrivate(), Collections.singletonList(cert.getCertificate()));
-            PrivateKey aPrivate = keyPair.getPrivate();
-            List<X509Certificate> certificateChain = cert.getCertificateChain();
-            X509Certificate certificate = cert.getCertificate();
-            storeKey(config.getDomain(), aPrivate,certificateChain);
+            storeKey(config.getDomain(), keyPair.getPrivate(),cert.getCertificateChain());
         } catch (LetsEcryptException ex) {
             error(ex);
         } catch (StoreException e) {
@@ -118,7 +111,7 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
         try {
             while (order.getStatus() != Status.VALID) {
                 try {
-                    TimeUnit.SECONDS.sleep(3);
+                    TimeUnit.SECONDS.sleep(15);
                 } catch (InterruptedException e) {
                 }
                 order.update();
