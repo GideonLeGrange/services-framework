@@ -1,20 +1,19 @@
 package me.legrange.services.helicopterorm;
 
+import com.heliorm.Orm;
+import com.heliorm.OrmBuilder;
+import com.heliorm.OrmException;
+import com.heliorm.driver.SqlDriver;
+import com.heliorm.driver.mysql.MySqlDriver;
+import com.heliorm.driver.postgresql.PostgreSqlDriver;
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
 import me.legrange.services.jdbc.ConnectionPoolException;
 import me.legrange.services.jdbc.JdbcComponent;
 import me.legrange.services.jdbc.WithJdbc;
-import net.legrange.orm.Orm;
-import net.legrange.orm.OrmBuilder;
-import net.legrange.orm.OrmException;
-import net.legrange.orm.driver.SqlDriver;
 
 import static java.lang.String.format;
-
-import net.legrange.orm.driver.mysql.MySqlDriver;
-import net.legrange.orm.driver.postgresql.PostgreSqlDriver;
 
 /**
  * @author matt-vm
