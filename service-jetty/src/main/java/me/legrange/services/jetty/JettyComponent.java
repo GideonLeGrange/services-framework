@@ -76,7 +76,7 @@ public class JettyComponent extends Component<Service, JettyConfig> implements W
             }
             if (config.getHttps() != null) {
                 connectors.add(makeSslConnector());
-                ServerConnector serverConnector = makePlainConnector();
+                ServerConnector serverConnector = makeSslConnector();
                 httpsContext = makeContext("https");
             }
             if (connectors.isEmpty()) {

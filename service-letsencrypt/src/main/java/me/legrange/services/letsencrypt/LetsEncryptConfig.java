@@ -9,8 +9,8 @@ public class LetsEncryptConfig {
     @NotBlank(message = "The domain for which to manage certificates")
     private String domain;
     @NotBlank(message = "The Let's Encrypt URL must be specified")
-//    private String letsEncryptUrl = "https://acme-staging-v02.api.letsencrypt.org/directory";
-    private String letsEncryptUrl = "https://acme-v02.api.letsencrypt.org/directory";
+    private String letsEncryptUrl = "https://acme-staging-v02.api.letsencrypt.org/directory";
+//    private String letsEncryptUrl = "https://acme-v02.api.letsencrypt.org/directory";
 
     @NotNull(message = "The certificate issuer must be specified")
     private IssuerConfig issuer;

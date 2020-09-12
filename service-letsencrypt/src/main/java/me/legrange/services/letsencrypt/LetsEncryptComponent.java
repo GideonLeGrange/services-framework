@@ -91,9 +91,10 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
             KeyPair keyPair = obtainKeys();
             Account account = getAccount(keyPair);
             Order order = createOrder(account);
-            createCsr(order);
+            KeyPair domainKeyPair = createCsr(order);
             Certificate cert = downloadCertificate(order);
-            storeKey(config.getDomain(), keyPair.getPrivate(),cert.getCertificateChain());
+
+            storeKey(config.getDomain(), domainKeyPair.getPrivate(),cert.getCertificateChain());
         } catch (LetsEcryptException ex) {
             error(ex);
         } catch (StoreException e) {
@@ -128,9 +129,8 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
      * @param order The order to use
      * @throws LetsEcryptException
      */
-    private void createCsr(Order order) throws LetsEcryptException {
+    private KeyPair createCsr(Order order) throws LetsEcryptException {
         debug("createCsr()");
-
         KeyPair domainKeyPair = KeyPairUtils.createKeyPair(2048);
         CSRBuilder csrb = new CSRBuilder();
         csrb.addDomain(config.getDomain());
@@ -145,6 +145,7 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
             csrb.sign(domainKeyPair);
             csr = csrb.getEncoded();
             order.execute(csr);
+            return domainKeyPair;
         } catch (IOException | AcmeException ex) {
             throw new LetsEcryptException(format("Error creating certificate for '%s' (%s)", config.getDomain(), ex.getMessage()), ex);
         }
