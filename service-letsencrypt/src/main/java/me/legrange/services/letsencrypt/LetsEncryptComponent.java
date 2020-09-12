@@ -39,8 +39,7 @@ import static java.lang.String.format;
 
 public final class LetsEncryptComponent extends Component<Service, LetsEncryptConfig> implements WithJetty, WithKeyStore, WithLogging {
 
-    private static final int MIN_EXPIRY_DAYS = 180;
-    private static LetsEncryptComponent instance;
+  private static LetsEncryptComponent instance;
     private LetsEncryptConfig config;
     private final Map<String, String> challengeResponses = new ConcurrentHashMap();
 
@@ -223,9 +222,10 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
 
     private void checkRenewal() {
         try {
+            info("Doing daily certificate renewal check ");
             X509Certificate cert = getCertificate(config.getDomain());
             Date notAfter = cert.getNotAfter();
-            if (notAfter.toInstant().isBefore(Instant.now().plus(MIN_EXPIRY_DAYS, ChronoUnit.DAYS))) {
+            if (notAfter.toInstant().isBefore(Instant.now().plus(config.getRenewalDays(), ChronoUnit.DAYS))) {
                 warning("Certificate for %s expires on %s", config.getDomain(), notAfter);
                 obtainCertificate();
             }

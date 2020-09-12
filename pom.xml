@@ -27,7 +27,6 @@
         <module>service-mongo</module>
         <module>service-letsencrypt</module>
         <module>service-jedis</module>
-        <module>poes</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

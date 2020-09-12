@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static me.legrange.log.Log.error;
 import static me.legrange.log.Log.info;
 import static me.legrange.log.Log.warning;
 
@@ -92,6 +93,7 @@ public class JettyComponent extends Component<Service, JettyConfig> implements W
             }
             server.setHandler(handlers);
             server.start();
+            keyStore().addListener(this::onCertificateUpdate);
             info("Started Jetty server on %s", connectors.stream().map(c -> c.getPort()).collect(Collectors.toList()));
         } catch (Exception ex) {
             throw new ComponentException(ex.getMessage(), ex);
@@ -221,6 +223,31 @@ public class JettyComponent extends Component<Service, JettyConfig> implements W
         connector.setPort(config.getHttp().getPort());
         connector.setName("http");
         return connector;
+    }
+
+
+    private void onCertificateUpdate(String alias) {
+        if (httpsContext != null) {
+            if ((config.getHttps().getAlias() == null) || alias.equals(config.getHttps().getAlias())) {
+                try {
+                    HandlerCollection handlers = new HandlerCollection();
+                    if (httpContext != null) {
+                        httpContext = makeContext("http");
+                        handlers.addHandler(httpContext);
+                    }
+                    if (httpsContext != null) {
+                        httpsContext = makeContext("https");
+                        handlers.addHandler(httpsContext);
+                    }
+                    server.stop();
+                    server.setHandler(handlers);
+                    server.start();
+                    info("Restarted web server after update to certifcate for %s", alias);
+                } catch (Exception e) {
+                    error(e);
+                }
+            }
+        }
     }
 
 }

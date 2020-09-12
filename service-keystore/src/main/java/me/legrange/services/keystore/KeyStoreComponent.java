@@ -9,9 +9,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.*;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 import static java.lang.String.format;
 
@@ -22,6 +28,7 @@ public final class KeyStoreComponent extends Component<Service, KeyStoreConfig> 
 
     private KeyStoreConfig config;
     private KeyStore keyStore;
+    private List<Consumer<String>> listeners = new ArrayList<>();
 
     public KeyStoreComponent(Service service) {
         super(service);
@@ -42,19 +49,11 @@ public final class KeyStoreComponent extends Component<Service, KeyStoreConfig> 
         return "keyStore";
     }
 
-    public void storeCertificate(String alias, Certificate cert) throws StoreException {
-        try {
-            keyStore.setCertificateEntry(alias, cert);
-            saveKeyStore();
-        } catch (KeyStoreException e) {
-            throw new StoreException(format("Error storing certificate '%s' (%s)", alias, e.getMessage()), e);
-        }
-    }
-
     public void storeKey(String alias, PrivateKey key, Certificate[] chain) throws StoreException {
         try {
             keyStore.setKeyEntry(alias, key, getPassword().toCharArray(), chain);
             saveKeyStore();
+            updateListeners(alias);
         } catch (KeyStoreException ex) {
             throw new StoreException(format("Error storing key '%s' (%s)", alias, ex.getMessage()), ex);
         }
@@ -66,6 +65,10 @@ public final class KeyStoreComponent extends Component<Service, KeyStoreConfig> 
 
     public String getPassword() {
         return config.getPassword();
+    }
+
+    public void addListener(Consumer<String> listener) {
+        listeners.add(listener);
     }
 
     private boolean haveKeyStore() {
@@ -110,6 +113,17 @@ public final class KeyStoreComponent extends Component<Service, KeyStoreConfig> 
             throw new StoreException(format("Cannot read alias %s from key store (%s)", alias, e.getMessage()), e);
         }
 
+    }
+
+    private void updateListeners(String alias) {
+        for (Consumer<String> listener : listeners) {
+            try {
+                listener.accept(alias);
+            }
+            catch (Exception ex) {
+                error(ex, "Uncaught error in key store listener (%s)", ex.getMessage());
+            }
+        }
     }
 
 }
