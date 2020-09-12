@@ -84,16 +84,11 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
     private void obtainCertificate() {
         debug("obtainCertificate()");
         try {
-            try {
-                TimeUnit.SECONDS.sleep(5);
-            } catch (InterruptedException e) {
-            }
             KeyPair keyPair = obtainKeys();
             Account account = getAccount(keyPair);
             Order order = createOrder(account);
             KeyPair domainKeyPair = createCsr(order);
             Certificate cert = downloadCertificate(order);
-
             storeKey(config.getDomain(), domainKeyPair.getPrivate(),cert.getCertificateChain());
         } catch (LetsEcryptException ex) {
             error(ex);
@@ -216,7 +211,6 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
      * Schedule a certificate check for the future
      */
     private void scheduleRenewalCheck() {
-
         Timer timer = new Timer(true);
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -242,6 +236,7 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
 
     private void renewCertificate() {
         debug("Renew certificate not implemeted yet");
+        obtainCertificate();
     }
 
     /**
