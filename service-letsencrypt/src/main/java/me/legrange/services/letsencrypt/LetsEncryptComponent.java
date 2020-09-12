@@ -227,16 +227,11 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
             Date notAfter = cert.getNotAfter();
             if (notAfter.toInstant().isBefore(Instant.now().plus(MIN_EXPIRY_DAYS, ChronoUnit.DAYS))) {
                 warning("Certificate for %s expires on %s", config.getDomain(), notAfter);
-                renewCertificate();
+                obtainCertificate();
             }
         } catch (LetsEcryptException e) {
             error(e);
         }
-    }
-
-    private void renewCertificate() {
-        debug("Renew certificate not implemeted yet");
-        obtainCertificate();
     }
 
     /**
