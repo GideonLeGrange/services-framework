@@ -41,7 +41,7 @@ public final class HelicopterOrmComponent extends Component<Service, HelicopterO
                 default:
                     throw new ComponentException(format("Unsupported driver type '%s'", dialect));
             }
-            orm = OrmBuilder.create(jdbc(), driverClass)
+            orm = OrmBuilder.create(() -> jdbc().getConnection(), driverClass)
                     .setCreateMissingTables(config.isCreateMissingTables())
                     .setRollbackOnUncommittedClose(config.isRollbackOnUncommittedClose())
                     .build();

@@ -9,8 +9,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
-import static java.lang.String.format;
-
 /**
  *
  * @author gideon
@@ -34,8 +32,8 @@ public class JdbcComponent<S extends Service, C extends JdbcConfig> extends Comp
                 info("Connecting to SQL server");
                 Connection connection = pool.getConnection();
                 connected = true;
-            } catch (SQLException ex) {
-                error(ex, "Error connecting to SQL server: %s", ex.getMessage());
+            } catch (ConnectionPoolException ex) {
+                error(ex);
             }
             if (!connected) {
                 warning("Could not connect to SQL server. Retrying in %d seconds", conf.getRetryTime());
@@ -52,12 +50,8 @@ public class JdbcComponent<S extends Service, C extends JdbcConfig> extends Comp
         return "jdbc";
     }
 
-    public final Connection getConnection() throws ConnectionPoolException {
-        try {
-            return pool.getConnection();
-        } catch (SQLException e) {
-            throw new ConnectionPoolException(format("Error obtaining SQL connection from pool (%s)", e.getMessage()),e);
-        }
+    public final ConnectionPool getPool() {
+        return pool;
     }
 
     public final String getDialect() {
