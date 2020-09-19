@@ -9,7 +9,7 @@ import me.legrange.config.Configuration;
 public class HelicopterOrmConfig extends Configuration {
 
     private boolean createMissingTables = false;
-    private boolean isRollbackOnUncommittedClose = false;
+    private boolean rollbackOnUncommittedClose = false;
 
     public boolean isCreateMissingTables() {
         return createMissingTables;
@@ -20,10 +20,10 @@ public class HelicopterOrmConfig extends Configuration {
     }
 
     public boolean isRollbackOnUncommittedClose() {
-        return isRollbackOnUncommittedClose;
+        return rollbackOnUncommittedClose;
     }
 
     public void setRollbackOnUncommittedClose(boolean rollbackOnUncommittedClose) {
-        isRollbackOnUncommittedClose = rollbackOnUncommittedClose;
+        rollbackOnUncommittedClose = rollbackOnUncommittedClose;
     }
 }
