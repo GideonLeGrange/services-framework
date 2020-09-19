@@ -6,7 +6,6 @@ import me.legrange.service.Service;
 import me.legrange.services.logging.WithLogging;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
 /**
