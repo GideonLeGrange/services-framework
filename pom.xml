@@ -9,7 +9,9 @@
     <modules>
         <module>service-server</module>
         <module>service-logging</module>
+        <module>service-keystore</module>
         <module>service-jetty</module>
+        <module>service-letsencrypt</module>
         <module>service-rabbit-mq</module>
         <module>service-monitor</module>
         <module>service-job-scheduler</module>
@@ -24,7 +26,6 @@
         <module>service-influxdb</module>
         <module>service-postgresql</module>
         <module>service-mongo</module>
-        <module>service-letsencrypt</module>
         <module>service-jedis</module>
     </modules>
     <properties>
