@@ -10,6 +10,8 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -19,6 +21,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static me.legrange.log.Log.critical;
@@ -33,6 +36,7 @@ public abstract class Service<Conf extends Configuration> {
     private Conf conf;
     private final Map<Class<? extends Component>, Component> components = new HashMap();
     private final ExecutorService threadPool = new ForkJoinPool(32);
+    private boolean running = false;
 
     public static void main(String... args) {
         try {
@@ -64,6 +68,7 @@ public abstract class Service<Conf extends Configuration> {
                 ex.printStackTrace();
                 failedStartup(String.format("Error configuring server: %s", ex.getMessage()));
             }
+            service.prepare();
             service.startComponents();
             service.start();
             while (service.isRunning()) {
@@ -94,6 +99,11 @@ public abstract class Service<Conf extends Configuration> {
             return clazz.cast(components.get(clazz));
         }
         throw new ComponentNotFoundException(format("No component registered of type '%s'. BUG!", clazz.getSimpleName()));
+    }
+
+    private void prepare() {
+        running = true;
+        Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
     }
 
     /**
@@ -222,7 +232,14 @@ public abstract class Service<Conf extends Configuration> {
         return res;
     }
 
-    public abstract boolean isRunning();
+    /**
+     * Check if the service is still running
+     *
+     * @return If it's running
+     */
+    private boolean isRunning() {
+        return running;
+    }
 
     /**
      * Start the service. This needs to be implemented by the implementation
@@ -231,6 +248,13 @@ public abstract class Service<Conf extends Configuration> {
      * @throws ServiceException Thrown if the service cannot be started
      */
     protected abstract void start() throws ServiceException;
+
+    /**
+     * Stop the service. This needs to be implemented by the implementation
+     * subclass to do cleanup work, like releasing resources or storing state
+     */
+    protected void stop() throws ServiceException {
+    }
 
     /**
      * Return the service configuration.
@@ -290,6 +314,34 @@ public abstract class Service<Conf extends Configuration> {
         if (!fmt.endsWith("\n")) {
             System.out.println();
         }
+    }
+
+    private void shutdown() {
+        try {
+            stop();
+        }
+        catch (ServiceException ex) {
+            error(ex,"Error stopping service (%s)", ex.getMessage());
+        }
+        catch (Exception ex) {
+            error(ex,"Uncaught error stopping service (%s)", ex.getMessage());
+        }
+        try {
+            List<Class<? extends Component>> types = new ArrayList(getRequiredComponents());
+            Collections.reverse(types);
+            for (Component com : types.stream().map(components::get).collect(Collectors.toList())) {
+                try {
+                    com.stop();
+                }
+                catch(ComponentException ex) {
+                    error(ex, "Error stopping component (%s)", ex.getMessage());
+                }
+            }
+        }
+        catch (ServiceException ex) {
+            error(ex,"Error finding components to stop (%s)", ex.getMessage());
+        }
+        running = false;
     }
 
 

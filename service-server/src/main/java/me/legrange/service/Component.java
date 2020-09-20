@@ -30,6 +30,13 @@ public abstract class Component<S extends Service, C> {
      */
     public abstract void start(C config) throws ComponentException;
 
+    /** Stop the component. Implementations need to do here what is required to do
+     * safe shutdown and cleanup.
+     *
+     * @throws ComponentException
+     */
+    public abstract void stop() throws ComponentException;
+
     /**
      * Get the name of the component. This is unique and is used to find the
      * component's configuration in the service config.
