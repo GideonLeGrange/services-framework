@@ -15,14 +15,12 @@
         <module>service-job-scheduler</module>
         <module>service-panacea-sms</module>
         <module>service-jdbc</module>
-        <module>service-mysql</module>
         <module>service-mail</module>
         <module>service-jooq</module>
         <module>service-helicopter-orm</module>
         <module>service-retrofit</module>
         <module>service-vertx</module>
         <module>service-influxdb</module>
-        <module>service-postgresql</module>
         <module>service-mongo</module>
         <module>service-letsencrypt</module>
         <module>service-jedis</module>
