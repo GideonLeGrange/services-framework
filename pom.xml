@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>me.legrange</groupId>
     <artifactId>services</artifactId>
-    <version>3.2.12</version>
+    <version>3.2.13</version>
     <packaging>pom</packaging>
     <modules>
         <module>service-server</module>
