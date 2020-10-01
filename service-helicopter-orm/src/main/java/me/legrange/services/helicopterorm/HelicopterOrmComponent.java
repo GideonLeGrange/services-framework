@@ -44,6 +44,7 @@ public final class HelicopterOrmComponent extends Component<Service, HelicopterO
             orm = OrmBuilder.create(() -> jdbc().getConnection(), driverClass)
                     .setCreateMissingTables(config.isCreateMissingTables())
                     .setRollbackOnUncommittedClose(config.isRollbackOnUncommittedClose())
+                    .setUseUnionAll(config.isUseUnionAll())
                     .build();
         } catch (ConnectionPoolException | OrmException ex) {
             throw new ComponentException(ex.getMessage(), ex);
