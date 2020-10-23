@@ -1,19 +1,5 @@
 package me.legrange.services.jetty;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringJoiner;
-import javax.servlet.DispatcherType;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.ws.rs.ext.MessageBodyWriter;
-
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
@@ -23,6 +9,16 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 
+import javax.servlet.DispatcherType;
+import javax.ws.rs.ext.MessageBodyWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import static java.lang.String.format;
 import static me.legrange.log.Log.info;
 
 /**
@@ -35,7 +31,7 @@ public class JettyComponent extends Component<Service, JettyConfig> {
     private Server server;
     private ServletContextHandler context;
     private boolean running = false;
-    private final Set<Class> jerseyProviders = new HashSet();
+    private final Set<Object> jerseyProviders = new HashSet();
     private final Map<String, Class> endpoints = new HashMap<>();
 
     public JettyComponent(Service service) {
@@ -68,9 +64,9 @@ public class JettyComponent extends Component<Service, JettyConfig> {
      * @param endpoint The endpoint class
      */
     public void addEndpoint(String path, Class endpoint) throws ComponentException {
-        ResourceConfig rc = new ResourceConfig(endpoint);
+        ResourceConfig rc = new ResourceConfig();
         checkForMessageBodyWriter();
-        for (Class provider : jerseyProviders) {
+        for (Object provider : jerseyProviders) {
             rc.register(provider);
         }
         ServletHolder holder = new ServletHolder(new ServletContainer(rc));
@@ -91,6 +87,17 @@ public class JettyComponent extends Component<Service, JettyConfig> {
     }
 
     public void addProvider(Class provider) throws ComponentException {
+        try {
+            addProvider(provider.getConstructor().newInstance());
+            jerseyProviders.add(provider.getConstructor().newInstance());
+        } catch (NoSuchMethodException e) {
+            throw new ComponentException(format("No default constructor for provider class %s. Either pass an instance or a provider with a default constructor",provider.getSimpleName()),e);
+        } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            throw new ComponentException(format("Error creating provider from class %s (%s)",provider.getSimpleName(), e.getMessage()),e);
+        }
+    }
+
+    public void addProvider(Object provider) throws ComponentException {
         jerseyProviders.add(provider);
         if (running) {
             info("Re-adding %d endpoint(s) because of provider change", endpoints.size());
@@ -113,7 +120,7 @@ public class JettyComponent extends Component<Service, JettyConfig> {
      * Check for a MessageBodyWriter
      */
     private void checkForMessageBodyWriter() throws ComponentException {
-        if (jerseyProviders.stream().noneMatch(p -> MessageBodyWriter.class.isAssignableFrom(p))) {
+        if (jerseyProviders.stream().noneMatch(p -> MessageBodyWriter.class.isInstance(p))) {
             throw new ComponentException("No MessageBodyWriters were registered for serialization. Remember to register them using the addProvider methods");
         }
     }

@@ -2,13 +2,6 @@ package me.legrange.services.jetty;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
@@ -18,6 +11,13 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 
 import static me.legrange.log.Log.debug;
 
@@ -50,8 +50,7 @@ public class GsonJerseyProvider implements MessageBodyWriter<Object>,
             Annotation[] annotations, MediaType mediaType,
             MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
             throws IOException {
-        InputStreamReader streamReader = new InputStreamReader(entityStream,
-                UTF_8);
+        InputStreamReader streamReader = new InputStreamReader(entityStream, UTF_8);
         try {
             return gson.fromJson(streamReader, genericType);
         } catch (com.google.gson.JsonSyntaxException e) {
