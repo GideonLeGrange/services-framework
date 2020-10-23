@@ -64,7 +64,8 @@ public class JettyComponent extends Component<Service, JettyConfig> {
      * @param endpoint The endpoint class
      */
     public void addEndpoint(String path, Class endpoint) throws ComponentException {
-        ResourceConfig rc = new ResourceConfig();
+        ResourceConfig rc = new ResourceConfig(endpoint);
+        new ResourceConfig()
         checkForMessageBodyWriter();
         for (Object provider : jerseyProviders) {
             rc.register(provider);
