@@ -4,7 +4,7 @@
     <parent>
         <groupId>me.legrange</groupId>
         <artifactId>services</artifactId>
-        <version>3.4.1</version>
+        <version>3.4.2</version>
     </parent>
     <groupId>me.legrange.services</groupId>
     <artifactId>service-helicopter-orm</artifactId>
@@ -12,7 +12,7 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <orm.version>0.81</orm.version>
+        <orm.version>0.84</orm.version>
     </properties>
     <name>Helicopter ORM Integration</name>
     

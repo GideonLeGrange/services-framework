@@ -1,11 +1,11 @@
 package me.legrange.services.helicopterorm;
 
 import com.heliorm.Orm;
-import com.heliorm.OrmBuilder;
 import com.heliorm.OrmException;
-import com.heliorm.driver.SqlDriver;
-import com.heliorm.driver.mysql.MySqlDriver;
-import com.heliorm.driver.postgresql.PostgreSqlDriver;
+import com.heliorm.sql.SqlDriver;
+import com.heliorm.sql.SqlOrmBuilder;
+import com.heliorm.sql.mysql.MySqlDriver;
+import com.heliorm.sql.postgresql.PostgreSqlDriver;
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
@@ -41,7 +41,7 @@ public final class HelicopterOrmComponent extends Component<Service, HelicopterO
                 default:
                     throw new ComponentException(format("Unsupported driver type '%s'", dialect));
             }
-            orm = OrmBuilder.create(() -> jdbc().getConnection(), driverClass)
+            orm = SqlOrmBuilder.create(() -> jdbc().getConnection(), driverClass)
                     .setCreateMissingTables(config.isCreateMissingTables())
                     .setRollbackOnUncommittedClose(config.isRollbackOnUncommittedClose())
                     .setUseUnionAll(config.isUseUnionAll())
