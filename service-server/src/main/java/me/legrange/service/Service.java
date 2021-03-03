@@ -120,8 +120,13 @@ public abstract class Service<Conf extends Configuration> {
             Constructor<? extends Component> cons = clazz.getConstructor(new Class<?>[]{Service.class});
             C comp = (C) cons.newInstance(this);
             Method method = clazz.getMethod("start", new Class[]{Object.class});
-            Object compConf = getConfigFor(comp);
-            comp.start(compConf);
+            if (comp.requiresConfig()) {
+                Object compConf = getConfigFor(comp);
+                comp.start(compConf);
+            }
+            else {
+                comp.start(null);
+            }
             components.put(clazz, comp);
             return comp;
         } catch (InstantiationException | IllegalAccessException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {

@@ -38,13 +38,23 @@ public abstract class Component<S extends Service, C> {
      */
     public abstract String getName();
 
+    /** Call to determine if the component requires configuration. By default this is true,
+     * but if a component does not require any configuration, it can be overriden to return false
+     * which will cause the system not to try to locate it's configuration.
+     *
+     * @return
+     */
+    public boolean requiresConfig(){
+        return true;
+    }
+
     /**
      * Access the service that owns this component. Utility method to get access
      * to functionality required by the component.
      *
      * @return The service
      */
-    protected S service() {
+    protected final S service() {
         return service;
     }
 
@@ -52,7 +62,7 @@ public abstract class Component<S extends Service, C> {
         return (C) service.getComponent(clazz);
     }
 
-    protected <C extends Component> C requireComponent(Class<C> clazz) throws ServiceException {
+    protected final <C extends Component> C requireComponent(Class<C> clazz) throws ServiceException {
         return (C) service.requireComponent(clazz);
     }
 }
