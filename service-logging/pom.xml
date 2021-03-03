@@ -4,7 +4,7 @@
     <parent>
         <groupId>me.legrange</groupId>
         <artifactId>services</artifactId>
-        <version>3.5.3</version>
+        <version>3.5.4</version>
     </parent>
     <groupId>me.legrange.services</groupId>
     <artifactId>service-logging</artifactId>
@@ -32,7 +32,7 @@
         <dependency>
             <groupId>me.legrange</groupId>
             <artifactId>log</artifactId>
-            <version>1.1.1</version>
+            <version>1.2</version>
         </dependency>
     </dependencies>
 </project>
