@@ -28,7 +28,7 @@ public class MapDbComponent extends Component<Service, MapDbConfig> {
 
     @Override
     public String getName() {
-        return "jedis";
+        return "mapDb";
     }
 
     DB mapDb() {
