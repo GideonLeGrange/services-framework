@@ -3,7 +3,9 @@ package me.legrange.services.jetty;
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -33,6 +35,7 @@ public class JettyComponent extends Component<Service, JettyConfig> {
     private boolean running = false;
     private final Set<Object> jerseyProviders = new HashSet();
     private final Map<String, Class> endpoints = new HashMap<>();
+    private JettyConfig config;
 
     public JettyComponent(Service service) {
         super(service);
@@ -46,10 +49,11 @@ public class JettyComponent extends Component<Service, JettyConfig> {
 
     @Override
     public void start(JettyConfig config) throws ComponentException {
+        this.config = config;
         try {
             context = makeContext();
             server = new Server(config.getPort());
-            server.setHandler(context);
+            server.setHandler(gzip(context));
             server.start();
             info("Started Jetty server on port %d", config.getPort());
         } catch (Exception ex) {
@@ -104,7 +108,7 @@ public class JettyComponent extends Component<Service, JettyConfig> {
             context = makeContext();
             try {
                 server.stop();
-                server.setHandler(context);
+                server.setHandler(gzip(context));
                 server.start();
             }
             catch (Exception ex) {
@@ -129,6 +133,17 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
         context.addFilter(ErrorFilter.class, "/*", EnumSet.allOf(DispatcherType.class));
+        return context;
+    }
+
+    private Handler gzip(ServletContextHandler context) {
+        if (config.isEnableGzip()) {
+            GzipHandler handler = new GzipHandler();
+            handler.setIncludedMethods("PUT", "POST", "GET");
+            handler.setInflateBufferSize(2048);
+            handler.setHandler(context);
+            return handler;
+        }
         return context;
     }
 }

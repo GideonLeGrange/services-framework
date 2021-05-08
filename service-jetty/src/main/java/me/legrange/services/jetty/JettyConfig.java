@@ -13,6 +13,8 @@ public class JettyConfig {
     @Max(value=65535, message="Jetty port must be between 1 an 65536")
     private int port;
 
+    private boolean enableGzip = false;
+
     public int getPort() {
         return port;
     }
@@ -20,5 +22,12 @@ public class JettyConfig {
     public void setPort(int port) {
         this.port = port;
     }
-    
+
+    public boolean isEnableGzip() {
+        return enableGzip;
+    }
+
+    public void setEnableGzip(boolean enableGzip) {
+        this.enableGzip = enableGzip;
+    }
 }
