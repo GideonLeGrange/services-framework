@@ -1,5 +1,6 @@
 package me.legrange.service.mongo;
 
+import com.mongodb.MongoClient;
 import me.legrange.service.ComponentNotFoundException;
 import me.legrange.service.WithComponent;
 
@@ -9,7 +10,7 @@ import me.legrange.service.WithComponent;
  */
 public interface WithMongo extends WithComponent {
 
-    default MongoComponent mongo() throws ComponentNotFoundException {
-        return getComponent(MongoComponent.class);
+    default MongoClient mongo() throws ComponentNotFoundException {
+        return getComponent(MongoComponent.class).getClient();
     }
 }
