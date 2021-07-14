@@ -26,5 +26,11 @@ public class StateEndpoint {
     public Object getState(@PathParam("name") String name, @QueryParam("flatten") boolean flatten) throws ComponentException {
          return MonitorComponent.getInstance().getMonitorState(name, flatten);
     }
-    
+
+    @GET
+    @Path("/{name}/{variable}")
+    public Object getSpecificState(@PathParam("name") String name, @PathParam("variable") String variable) throws ComponentException {
+        return MonitorComponent.getInstance().getMonitorState(name, variable);
+    }
+
 }
