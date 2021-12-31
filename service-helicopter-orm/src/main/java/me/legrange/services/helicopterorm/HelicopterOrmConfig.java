@@ -10,6 +10,7 @@ public class HelicopterOrmConfig extends Configuration {
 
     private boolean createMissingTables = false;
     private boolean rollbackOnUncommittedClose = false;
+    private boolean useUnionAll = false;
 
     public boolean isCreateMissingTables() {
         return createMissingTables;
@@ -25,5 +26,13 @@ public class HelicopterOrmConfig extends Configuration {
 
     public void setRollbackOnUncommittedClose(boolean rollbackOnUncommittedClose) {
         rollbackOnUncommittedClose = rollbackOnUncommittedClose;
+    }
+
+    public boolean isUseUnionAll() {
+        return useUnionAll;
+    }
+
+    public void setUseUnionAll(boolean useUnionAll) {
+        this.useUnionAll = useUnionAll;
     }
 }

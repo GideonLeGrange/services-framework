@@ -9,8 +9,8 @@
         <version>3.7.0</version>
     </parent>
     <groupId>me.legrange.services</groupId>
-    <artifactId>service-jedis</artifactId>
-    <name>Jedis Integration</name>
+    <artifactId>service-mapdb</artifactId>
+    <name>MapDB Integration</name>
     <packaging>jar</packaging>
     <dependencies>
         <dependency>
@@ -20,11 +20,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
-            <version>3.2.0</version>
-            <type>jar</type>
-            <scope>compile</scope>
+            <groupId>org.mapdb</groupId>
+            <artifactId>mapdb</artifactId>
+            <version>3.0.8</version>
         </dependency>
     </dependencies>
 

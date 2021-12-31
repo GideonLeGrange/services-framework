@@ -68,6 +68,26 @@ public final class MonitorComponent extends Component<Service, MonitorConfig> im
         }
     }
 
+    final Object getMonitorState(String name, String variable) throws ComponentException {
+        Supplier<State> sup = monitors.get(name);
+        if (sup == null) {
+            throw new ComponentException(format("No monitor '%s' is defined", name));
+        }
+        State state = sup.get();
+        Optional<Measurement> any = state.getData().stream()
+                .filter(m -> m.getName().equals(variable))
+                .findAny();
+        try {
+            if (any.isPresent()) {
+                return sup.get();
+            }
+            throw new ComponentException(format("No variable '%s' under '%s' is defined", variable, name));
+        } catch (Throwable ex) {
+            error(ex);
+            return new State(Status.ERROR, format("Monitoring failure: ", ex.getMessage()), Collections.EMPTY_LIST);
+        }
+    }
+
     @Override
     public String getName() {
         return "monitor";

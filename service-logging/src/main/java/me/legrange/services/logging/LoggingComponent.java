@@ -49,6 +49,12 @@ public class LoggingComponent extends Component<Service, LoggingConfig> {
             if (!logger.getClass().equals(ConsoleLogger.class)) {
                 Log.info("Logging to %s with default level %s", logger.getName(), config.getLevel());
             }
+            if (!config.getLevels().isEmpty()) {
+                Log.info("Setting up log levels for packages/name spaces");
+                for (String name : config.getLevels().keySet()) {
+                    Log.setLevel(name, config.getLevels().get(name));
+                }
+            }
         } catch (LoggerException ex) {
             throw new ComponentException(format("Error setting up logging: %s", ex.getMessage()), ex);
         }
