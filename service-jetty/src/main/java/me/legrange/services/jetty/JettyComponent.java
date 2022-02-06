@@ -4,7 +4,11 @@ import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
 import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.NCSARequestLog;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.handler.RequestLogHandler;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -53,7 +57,7 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         try {
             context = makeContext();
             server = new Server(config.getPort());
-            server.setHandler(gzip(context));
+            server.setHandler(requestLog(gzip(context)));
             server.start();
             info("Started Jetty server on port %d", config.getPort());
         } catch (Exception ex) {
@@ -136,7 +140,22 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         return context;
     }
 
-    private Handler gzip(ServletContextHandler context) {
+    private Handler requestLog(Handler context) {
+        if (config.getRequestLog() != null) {
+            RequestLogHandler requestLogHandler = new RequestLogHandler();
+            NCSARequestLog requestLog = new NCSARequestLog(config.getRequestLog());
+            requestLog.setRetainDays(90);
+            requestLog.setAppend(true);
+            requestLog.setExtended(false);
+            requestLog.setLogTimeZone("GMT");
+            requestLogHandler.setRequestLog(requestLog);
+            requestLogHandler.setHandler(context);
+            return requestLogHandler;
+        }
+        return context;
+    }
+
+    private Handler gzip(Handler context) {
         if (config.isEnableGzip()) {
             GzipHandler handler = new GzipHandler();
             handler.setIncludedMethods("PUT", "POST", "GET");
