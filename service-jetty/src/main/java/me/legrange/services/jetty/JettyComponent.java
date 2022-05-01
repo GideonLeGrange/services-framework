@@ -6,8 +6,6 @@ import me.legrange.service.Service;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.NCSARequestLog;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.handler.RequestLogHandler;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -18,6 +16,7 @@ import org.glassfish.jersey.servlet.ServletContainer;
 import javax.servlet.DispatcherType;
 import javax.ws.rs.ext.MessageBodyWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,7 +37,7 @@ public class JettyComponent extends Component<Service, JettyConfig> {
     private ServletContextHandler context;
     private boolean running = false;
     private final Set<Object> jerseyProviders = new HashSet();
-    private final Map<String, Class> endpoints = new HashMap<>();
+    private final Map<String, Set<Class<?>>> endpoints = new HashMap<>();
     private JettyConfig config;
 
     public JettyComponent(Service service) {
@@ -65,6 +64,30 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         }
     }
 
+    public void addEndpoints(String path, Set<Class<?>> endpoints) throws ComponentException {
+        checkForMessageBodyWriter();
+        ResourceConfig rc = new ResourceConfig(endpoints);
+        for (Object provider : jerseyProviders) {
+            rc.register(provider);
+        }
+        ServletHolder holder = new ServletHolder(new ServletContainer(rc));
+        context.addServlet(holder, path + "/*");
+        try {
+            context.start();
+        } catch (Exception ex) {
+            throw new ComponentException(ex.getMessage(), ex);
+        }
+        if (this.endpoints.containsKey(path)) {
+            info("Re-added %d endpoints on path %s", endpoints.size(), path);
+        }
+        else {
+            info("Added %d new endpoint of type  on path %s", endpoints.size(), path);
+            this.endpoints.put(path, endpoints);
+        }
+        running = true;
+
+    }
+
     /**
      * Add a new endpoint with the given path and endpoint class.
      *
@@ -89,7 +112,7 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         }
         else {
             info("Added new endpoint of type '%s' on '%s'", endpoint.getSimpleName(), path);
-            endpoints.put(path, endpoint);
+            endpoints.put(path, Collections.singleton(endpoint));
         }
         running = true;
     }
@@ -118,8 +141,8 @@ public class JettyComponent extends Component<Service, JettyConfig> {
             catch (Exception ex) {
                 throw new ComponentException(ex.getMessage(), ex);
             }
-            for (Map.Entry<String, Class> pair : endpoints.entrySet()) {
-                addEndpoint(pair.getKey(), pair.getValue());
+            for (Map.Entry<String, Set<Class<?>>> pair : endpoints.entrySet()) {
+                addEndpoints(pair.getKey(), pair.getValue());
             }
         }
     }
