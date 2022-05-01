@@ -65,7 +65,6 @@ public class JettyComponent extends Component<Service, JettyConfig> {
     }
 
     public void addEndpoints(String path, Set<Class<?>> endpoints) throws ComponentException {
-        checkForMessageBodyWriter();
         ResourceConfig rc = new ResourceConfig(endpoints);
         for (Object provider : jerseyProviders) {
             rc.register(provider);
@@ -85,7 +84,7 @@ public class JettyComponent extends Component<Service, JettyConfig> {
             this.endpoints.put(path, endpoints);
         }
         running = true;
-
+        checkForMessageBodyWriter();
     }
 
     /**
@@ -120,7 +119,6 @@ public class JettyComponent extends Component<Service, JettyConfig> {
     public void addProvider(Class provider) throws ComponentException {
         try {
             addProvider(provider.getConstructor().newInstance());
-            jerseyProviders.add(provider.getConstructor().newInstance());
         } catch (NoSuchMethodException e) {
             throw new ComponentException(format("No default constructor for provider class %s. Either pass an instance or a provider with a default constructor",provider.getSimpleName()),e);
         } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
