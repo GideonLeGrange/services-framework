@@ -119,12 +119,10 @@ public abstract class Service<Conf extends Configuration> {
         try {
             Constructor<? extends Component> cons = clazz.getConstructor(new Class<?>[]{Service.class});
             C comp = (C) cons.newInstance(this);
-            Method method = clazz.getMethod("start", new Class[]{Object.class});
             if (comp.requiresConfig()) {
                 Object compConf = getConfigFor(comp);
                 comp.start(compConf);
-            }
-            else {
+            } else {
                 comp.start(null);
             }
             components.put(clazz, comp);
@@ -142,9 +140,15 @@ public abstract class Service<Conf extends Configuration> {
      * @return The configuration class
      */
     private Class<Conf> getConfigClass() throws ServiceException {
-        String name = getClass().getName().replace("Service", "Config");
-        if (!name.endsWith("Config")) {
+        String name = getClass().getName();
+        int idx = name.lastIndexOf("Service");
+        if (idx > 0) {
+            name = name.substring(0, idx);
             name = name + "Config";
+        } else {
+            if (!name.endsWith("Config")) {
+                name = name + "Config";
+            }
         }
         try {
             Class<?> clazz = Class.forName(name);
