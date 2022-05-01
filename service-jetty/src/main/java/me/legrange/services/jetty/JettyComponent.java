@@ -21,10 +21,12 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static java.lang.String.format;
 import static me.legrange.log.Log.info;
+import static me.legrange.log.Log.warning;
 
 /**
  * A component that adds Jetty HTTP functionality.
@@ -78,8 +80,7 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         }
         if (this.endpoints.containsKey(path)) {
             info("Re-added %d endpoints on path %s", endpoints.size(), path);
-        }
-        else {
+        } else {
             info("Added %d new endpoint of type  on path %s", endpoints.size(), path);
             this.endpoints.put(path, endpoints);
         }
@@ -108,8 +109,7 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         }
         if (endpoints.containsKey(path)) {
             info("Re-added endpoint of type '%s' on '%s'", endpoint.getSimpleName(), path);
-        }
-        else {
+        } else {
             info("Added new endpoint of type '%s' on '%s'", endpoint.getSimpleName(), path);
             endpoints.put(path, Collections.singleton(endpoint));
         }
@@ -120,13 +120,22 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         try {
             addProvider(provider.getConstructor().newInstance());
         } catch (NoSuchMethodException e) {
-            throw new ComponentException(format("No default constructor for provider class %s. Either pass an instance or a provider with a default constructor",provider.getSimpleName()),e);
+            throw new ComponentException(format("No default constructor for provider class %s. Either pass an instance or a provider with a default constructor", provider.getSimpleName()), e);
         } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            throw new ComponentException(format("Error creating provider from class %s (%s)",provider.getSimpleName(), e.getMessage()),e);
+            throw new ComponentException(format("Error creating provider from class %s (%s)", provider.getSimpleName(), e.getMessage()), e);
         }
     }
 
     public void addProvider(Object provider) throws ComponentException {
+        if (MessageBodyWriter.class.isInstance(provider)) {
+            Optional<? extends MessageBodyWriter> mbr = findMessageBodyWriter();
+            if (mbr.isPresent()) {
+                jerseyProviders.remove(mbr.get());
+                warning("Replacing message body writer '%s' with '%s'",
+                        mbr.get().getClass().getSimpleName(),
+                        provider.getClass().getName());
+            }
+        }
         jerseyProviders.add(provider);
         if (running) {
             info("Re-adding %d endpoint(s) because of provider change", endpoints.size());
@@ -135,8 +144,7 @@ public class JettyComponent extends Component<Service, JettyConfig> {
                 server.stop();
                 server.setHandler(gzip(context));
                 server.start();
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 throw new ComponentException(ex.getMessage(), ex);
             }
             for (Map.Entry<String, Set<Class<?>>> pair : endpoints.entrySet()) {
@@ -149,9 +157,16 @@ public class JettyComponent extends Component<Service, JettyConfig> {
      * Check for a MessageBodyWriter
      */
     private void checkForMessageBodyWriter() throws ComponentException {
-        if (jerseyProviders.stream().noneMatch(p -> MessageBodyWriter.class.isInstance(p))) {
+        if (!findMessageBodyWriter().isPresent()) {
             throw new ComponentException("No MessageBodyWriters were registered for serialization. Remember to register them using the addProvider methods");
         }
+    }
+
+    private Optional<? extends MessageBodyWriter> findMessageBodyWriter() {
+        return jerseyProviders.stream()
+                .filter(p -> MessageBodyWriter.class.isInstance(p))
+                .map(p -> (MessageBodyWriter) p)
+                .findFirst();
     }
 
     private ServletContextHandler makeContext() {
