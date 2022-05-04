@@ -28,15 +28,22 @@ public class GsonJerseyProvider implements MessageBodyWriter<Object>,
         MessageBodyReader<Object> {
 
     private static final String UTF_8 = "UTF-8";
-    private final Gson gson;
+    private  Gson gson;
 
     public GsonJerseyProvider() {
-        GsonBuilder builder = new GsonBuilder()
-                .serializeNulls()
-                .setPrettyPrinting()
-                .enableComplexMapKeySerialization();
-        gson = builder.create();
-        debug("GsonJerseyProvider created");
+    }
+
+
+    protected Gson getGson() {
+        if (gson == null) {
+            GsonBuilder builder = new GsonBuilder()
+                    .serializeNulls()
+                    .setPrettyPrinting()
+                    .enableComplexMapKeySerialization();
+            gson = builder.create();
+            debug("GsonJerseyProvider created");
+        }
+        return gson;
     }
 
     @Override
@@ -52,7 +59,7 @@ public class GsonJerseyProvider implements MessageBodyWriter<Object>,
             throws IOException {
         InputStreamReader streamReader = new InputStreamReader(entityStream, UTF_8);
         try {
-            return gson.fromJson(streamReader, genericType);
+            return getGson().fromJson(streamReader, genericType);
         } catch (com.google.gson.JsonSyntaxException e) {
             // Log exception
         } finally {
@@ -81,7 +88,7 @@ public class GsonJerseyProvider implements MessageBodyWriter<Object>,
             WebApplicationException {
         OutputStreamWriter writer = new OutputStreamWriter(entityStream, UTF_8);
         try {
-            gson.toJson(object, genericType, writer);
+            getGson().toJson(object, genericType, writer);
         } finally {
             writer.close();
         }
