@@ -11,6 +11,7 @@ import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 import javax.servlet.DispatcherType;
@@ -65,9 +66,13 @@ public class JettyComponent extends Component<Service, JettyConfig> {
             throw new ComponentException(ex.getMessage(), ex);
         }
     }
-
+    
     public void addEndpoints(String path, Set<Class<?>> endpoints) throws ComponentException {
         ResourceConfig rc = new ResourceConfig(endpoints);
+
+        rc.addProperties(Collections.singletonMap("jersey.config.server.wadl.disableWadl", "true"));
+        rc.addProperties(Collections.singletonMap(ServerProperties.OUTBOUND_CONTENT_LENGTH_BUFFER, 0));
+
         for (Object provider : jerseyProviders) {
             rc.register(provider);
         }
