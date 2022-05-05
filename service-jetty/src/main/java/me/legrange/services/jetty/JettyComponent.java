@@ -66,7 +66,7 @@ public class JettyComponent extends Component<Service, JettyConfig> {
             throw new ComponentException(ex.getMessage(), ex);
         }
     }
-    
+
     public void addEndpoints(String path, Set<Class<?>> endpoints) throws ComponentException {
         ResourceConfig rc = new ResourceConfig(endpoints);
 
