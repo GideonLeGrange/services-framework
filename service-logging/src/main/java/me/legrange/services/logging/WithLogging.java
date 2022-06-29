@@ -1,8 +1,10 @@
 package me.legrange.services.logging;
 
-import java.util.function.Supplier;
 import me.legrange.log.Log;
+import me.legrange.log.Logger;
 import me.legrange.service.WithComponent;
+
+import java.util.function.Supplier;
 
 /**
  *
@@ -128,6 +130,14 @@ public interface WithLogging extends WithComponent {
      */
     default void debug(Supplier<String> msg) {
         Log.debug(msg);
+    }
+
+    /** Get the logger being used.
+     *
+     * @return The logger if set up.
+     */
+    default Logger getLogger() {
+        return getComponent(LoggingComponent.class).getLogger();
     }
 
 }

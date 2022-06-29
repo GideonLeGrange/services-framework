@@ -1,8 +1,8 @@
 package me.legrange.services.logging;
 
-import javax.validation.constraints.NotNull;
 import me.legrange.log.Level;
 
+import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,6 +18,7 @@ public class LoggingConfig {
     private ConsonleLoggerConfig consoleLogger;
     private FileLoggerConfig fileLogger;
     private NumberedLoggerConfig numberedExceptionLogger;
+    private CustomLoggerConfig customLogger;
     private Map<String, Level> levels = new HashMap();
 
     public Level getLevel() {
@@ -58,5 +59,13 @@ public class LoggingConfig {
 
     public void setLevels(Map<String, Level> levels) {
         this.levels = levels;
+    }
+
+    public CustomLoggerConfig getCustomLogger() {
+        return customLogger;
+    }
+
+    public void setCustomLogger(CustomLoggerConfig customLogger) {
+        this.customLogger = customLogger;
     }
 }
