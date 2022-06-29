@@ -189,6 +189,7 @@ public class JettyComponent extends Component<Service, JettyConfig> {
             requestLog.setAppend(true);
             requestLog.setExtended(false);
             requestLog.setLogTimeZone("GMT");
+            requestLog.setLogLatency(true);
             requestLogHandler.setRequestLog(requestLog);
             requestLogHandler.setHandler(context);
             return requestLogHandler;
