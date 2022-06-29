@@ -4,8 +4,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>me.legrange</groupId>
     <artifactId>services</artifactId>
-    <version>3.10.3</version>
+    <version>1.3.1</version>
     <packaging>pom</packaging>
+    <properties>
+        <log.version>1.3</log.version>
+            <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+            <maven.compiler.source>8</maven.compiler.source>
+            <maven.compiler.target>8</maven.compiler.target>
+    </properties>
     <modules>
         <module>service-server</module>
         <module>service-logging</module>
@@ -28,11 +34,6 @@
         <module>service-jedis</module>
         <module>service-mapdb</module>
     </modules>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-    </properties>
     <name>Java Standalone Services Library</name>
     <description>A simple microservices library for Java</description>
     <developers>
