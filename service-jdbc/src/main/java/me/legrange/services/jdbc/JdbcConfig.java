@@ -25,6 +25,8 @@ public class JdbcConfig {
     @NotNull
     private Integer retryTime = 10;
 
+    private int connectionPoolSize = 10;
+
     public String getUsername() {
         return username;
     }
@@ -63,5 +65,13 @@ public class JdbcConfig {
 
     public void setDialect(String dialect) {
         this.dialect = dialect;
+    }
+
+    public int getConnectionPoolSize() {
+        return connectionPoolSize;
+    }
+
+    public void setConnectionPoolSize(int connectionPoolSize) {
+        this.connectionPoolSize = connectionPoolSize;
     }
 }
