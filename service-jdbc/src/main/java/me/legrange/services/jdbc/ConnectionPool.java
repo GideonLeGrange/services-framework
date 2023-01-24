@@ -16,6 +16,7 @@ public final class ConnectionPool {
         config.setJdbcUrl(conf.getUrl());
         config.setUsername(conf.getUsername());
         config.setPassword(conf.getPassword());
+        config.setMaximumPoolSize(conf.getConnectionPoolSize());
         ds = new HikariDataSource(config);
     }
 
