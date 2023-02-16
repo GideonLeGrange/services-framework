@@ -69,10 +69,6 @@ public abstract class Service<Conf extends Configuration> {
                 failedStartup(String.format("Error configuring server: %s", ex.getMessage()));
             }
             service.startComponents();
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                warning("Shutdown signal received");
-                service.running = false;
-            }));
             service.setupShutdownSignals();
             service.start();
             service.running = true;
@@ -367,12 +363,9 @@ public abstract class Service<Conf extends Configuration> {
     private void setupShutdownSignals() {
         String[] signals =  new String [] {"TERM", "INT", "HUP"};
         for (String name : signals) {
-            Signal.handle(new Signal(name), new SignalHandler() {
-                @Override
-                public void handle(Signal sig) {
-                    warning("%s signal (%d) received; shutting down", sig.getName(), sig.getNumber());
-                    running = false;
-                }
+            Signal.handle(new Signal(name), sig -> {
+                warning("%s signal (%d) received; shutting down", sig.getName(), sig.getNumber());
+                running = false;
             });
         }
     }
