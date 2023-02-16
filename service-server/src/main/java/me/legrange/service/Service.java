@@ -3,6 +3,8 @@ package me.legrange.service;
 import me.legrange.config.Configuration;
 import me.legrange.config.ConfigurationException;
 import me.legrange.config.YamlLoader;
+import sun.misc.Signal;
+import sun.misc.SignalHandler;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -23,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import static java.lang.String.format;
 import static me.legrange.log.Log.critical;
 import static me.legrange.log.Log.error;
+import static me.legrange.log.Log.warning;
 
 /**
  * @param <Conf> The type of the configuration class for this service.
@@ -33,6 +36,7 @@ public abstract class Service<Conf extends Configuration> {
     private Conf conf;
     private final Map<Class<? extends Component>, Component> components = new HashMap();
     private final ExecutorService threadPool = new ForkJoinPool(32);
+    private boolean running;
 
     public static void main(String... args) {
         try {
@@ -65,15 +69,22 @@ public abstract class Service<Conf extends Configuration> {
                 failedStartup(String.format("Error configuring server: %s", ex.getMessage()));
             }
             service.startComponents();
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                warning("Shutdown signal received");
+                service.running = false;
+            }));
+            service.setupShutdownSignals();
             service.start();
+            service.running = true;
             while (service.isRunning()) {
                 try {
-                    TimeUnit.SECONDS.sleep(1);
+                    TimeUnit.MILLISECONDS.sleep(500);
                 } catch (InterruptedException ex) {
                 }
             }
             System.exit(0);
-        } catch (ServiceException | InstantiationException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+        } catch (ServiceException | InstantiationException | NoSuchMethodException | SecurityException |
+                 IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             error(ex, "Fatal error: %s", ex.getMessage());
             System.exit(1);
         } catch (FileNotFoundException ex) {
@@ -127,7 +138,8 @@ public abstract class Service<Conf extends Configuration> {
             }
             components.put(clazz, comp);
             return comp;
-        } catch (InstantiationException | IllegalAccessException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
+        } catch (InstantiationException | IllegalAccessException | SecurityException | IllegalArgumentException |
+                 InvocationTargetException ex) {
             throw new ServiceException(format("Error creating new component of type '%s': %s", clazz.getSimpleName(), ex.getMessage()), ex);
         } catch (NoSuchMethodException ex) {
             throw new ServiceException(format("Could not find constructor with Service as parameter on component of type '%s': %s", clazz.getSimpleName(), ex.getMessage()), ex);
@@ -231,7 +243,9 @@ public abstract class Service<Conf extends Configuration> {
         return res;
     }
 
-    public abstract boolean isRunning();
+    public final boolean isRunning() {
+        return running;
+    }
 
     /**
      * Start the service. This needs to be implemented by the implementation
@@ -348,6 +362,19 @@ public abstract class Service<Conf extends Configuration> {
             throw new ServiceException("Could not find the service class to instantiate. Did you implement the main method in your class?");
         }
         return clazz;
+    }
+
+    private void setupShutdownSignals() {
+        String[] signals =  new String [] {"TERM", "INT", "HUP"};
+        for (String name : signals) {
+            Signal.handle(new Signal(name), new SignalHandler() {
+                @Override
+                public void handle(Signal sig) {
+                    warning("%s signal (%d) received; shutting down", sig.getName(), sig.getNumber());
+                    running = false;
+                }
+            });
+        }
     }
 
     private static void failedStartup(String reason) {
