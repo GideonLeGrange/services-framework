@@ -26,9 +26,18 @@ public abstract class Component<S extends Service, C> {
      * done before the component's functionality is available.
      *
      * @param config The component's configuration.
-     * @throws ComponentException Thrown if there is a probme starting the component
+     * @throws ComponentException Thrown if there is a problem starting the component
      */
     public abstract void start(C config) throws ComponentException;
+
+    /** Stop the component. Implementations can override this to release resources,
+     * close connections or do other kinds of cleanup.
+     *
+     * @throws ComponentException Throw if there is a proble stopping the component
+     */
+    public void stop() throws ComponentException {
+
+    }
 
     /**
      * Get the name of the component. This is unique and is used to find the
