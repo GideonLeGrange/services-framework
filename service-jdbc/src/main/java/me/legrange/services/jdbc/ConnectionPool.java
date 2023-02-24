@@ -29,4 +29,8 @@ public final class ConnectionPool {
         }
     }
 
+    public void close() {
+        ds.close();
+    }
+
 }
