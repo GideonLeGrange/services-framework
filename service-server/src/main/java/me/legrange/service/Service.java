@@ -1,10 +1,8 @@
 package me.legrange.service;
 
-import me.legrange.config.Configuration;
 import me.legrange.config.ConfigurationException;
 import me.legrange.config.YamlLoader;
 import sun.misc.Signal;
-import sun.misc.SignalHandler;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -31,10 +29,10 @@ import static me.legrange.log.Log.warning;
  * @param <Conf> The type of the configuration class for this service.
  * @author gideon
  */
-public abstract class Service<Conf extends Configuration> {
+public abstract class Service<Conf> {
 
     private Conf conf;
-    private final Map<Class<? extends Component>, Component> components = new HashMap();
+    private final Map<Class<? extends Component>, Component> components = new HashMap<>();
     private final ExecutorService threadPool = new ForkJoinPool(32);
     private boolean running;
 
@@ -110,7 +108,6 @@ public abstract class Service<Conf extends Configuration> {
     /**
      * Start the service components
      *
-     * @throws ServiceException
      */
     private void startComponents() throws ServiceException {
         for (Class<? extends Component> clazz : getRequiredComponents()) {
@@ -124,11 +121,10 @@ public abstract class Service<Conf extends Configuration> {
      * Start a specific component
      *
      * @param clazz The class of the component to start.
-     * @throws ServiceException
      */
     private <C extends Component> C startComponent(Class<C> clazz) throws ServiceException {
         try {
-            Constructor<? extends Component> cons = clazz.getConstructor(new Class<?>[]{Service.class});
+            Constructor<? extends Component> cons = clazz.getConstructor(Service.class);
             C comp = (C) cons.newInstance(this);
             if (comp.requiresConfig()) {
                 Object compConf = getConfigFor(comp);
@@ -163,11 +159,7 @@ public abstract class Service<Conf extends Configuration> {
             }
         }
         try {
-            Class<?> clazz = Class.forName(name);
-            if (Configuration.class.isAssignableFrom(clazz)) {
-                return (Class<Conf>) clazz;
-            }
-            throw new ServiceException(format("Config class '%s' isn't a configuration class", clazz.getSimpleName()));
+            return (Class<Conf>) Class.forName(name);
         } catch (ClassNotFoundException ex) {
             throw new ServiceException(format("Could not find config class '%s' for service class '%s'. BUG!", name, getClass().getName()), ex);
         }
@@ -178,11 +170,9 @@ public abstract class Service<Conf extends Configuration> {
      * are supplied in the order in which they need to be activated.
      *
      * @return The set of components required.
-     * @throws ServiceException
      */
     private List<Class<? extends Component>> getRequiredComponents() throws ServiceException {
-        List<Class<? extends Component>> list = getRequiredComponents(getClass());
-        return list;
+        return getRequiredComponents(getClass());
     }
 
     /**
@@ -190,10 +180,9 @@ public abstract class Service<Conf extends Configuration> {
      * service).
      *
      * @return The list of components required.
-     * @throws ServiceException
      */
     private List<Class<? extends Component>> getRequiredComponents(Class<?> clazz) throws ServiceException {
-        List<Class<? extends Component>> res = new LinkedList();
+        List<Class<? extends Component>> res = new LinkedList<>();
         Set<Class<? extends WithComponent>> interfaces = getWithInterfaces(clazz);
         for (Class<? extends WithComponent> iface : interfaces) {
             String name = iface.getName().replace(".With", ".").concat("Component");
@@ -229,7 +218,7 @@ public abstract class Service<Conf extends Configuration> {
      * @return The set of interface classes.
      */
     private Set<Class<? extends WithComponent>> getWithInterfaces(Class<?> type) {
-        Set<Class<? extends WithComponent>> res = new HashSet();
+        Set<Class<? extends WithComponent>> res = new HashSet<>();
         for (Class<?> iface : type.getInterfaces()) {
             if (WithComponent.class.isAssignableFrom(iface)) {
                 res.add((Class<? extends WithComponent>) iface);
@@ -291,8 +280,6 @@ public abstract class Service<Conf extends Configuration> {
     /**
      * Configure the server.
      *
-     * @param config
-     * @throws ConfigurationException
      */
     private void configure(InputStream config) throws ServiceException {
         try {
@@ -322,7 +309,7 @@ public abstract class Service<Conf extends Configuration> {
         for (Method meth : conf.getClass().getMethods()) {
             if (meth.getName().equalsIgnoreCase(getName)) {
                 try {
-                    return meth.invoke(conf, new Object[]{});
+                    return meth.invoke(conf);
                 } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
                     throw new ServiceException(format("Cannot find configuration for component '%s' of type '%s' in config object of type '%s'. BUG!",
                             com.getName(), com.getClass().getSimpleName(), conf.getClass().getSimpleName()), ex);
@@ -336,8 +323,6 @@ public abstract class Service<Conf extends Configuration> {
     /**
      * Determine what sub-class of Service is the actual service we want to run.
      *
-     * @return
-     * @throws ServiceException
      */
     private static Class<? extends Service> determineServiceClass() throws ServiceException {
         Class[] classContext = new SecurityManager() {
@@ -367,12 +352,9 @@ public abstract class Service<Conf extends Configuration> {
     private void setupShutdownSignals() {
         String[] signals =  new String [] {"TERM", "INT", "HUP"};
         for (String name : signals) {
-            Signal.handle(new Signal(name), new SignalHandler() {
-                @Override
-                public void handle(Signal sig) {
-                    warning("%s signal (%d) received; shutting down", sig.getName(), sig.getNumber());
-                    running = false;
-                }
+            Signal.handle(new Signal(name), sig -> {
+                warning("%s signal (%d) received; shutting down", sig.getName(), sig.getNumber());
+                running = false;
             });
         }
     }
