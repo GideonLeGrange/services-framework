@@ -45,6 +45,11 @@ public class JdbcComponent<S extends Service, C extends JdbcConfig> extends Comp
     }
 
     @Override
+    public void stop() throws ComponentException {
+        pool.close();
+    }
+
+    @Override
     public String getName() {
         return "jdbc";
     }

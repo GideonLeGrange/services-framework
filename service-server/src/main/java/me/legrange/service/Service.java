@@ -67,10 +67,6 @@ public abstract class Service<Conf> {
                 failedStartup(String.format("Error configuring server: %s", ex.getMessage()));
             }
             service.startComponents();
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                warning("Shutdown signal received");
-                service.running = false;
-            }));
             service.setupShutdownSignals();
             service.start();
             service.running = true;
@@ -80,6 +76,8 @@ public abstract class Service<Conf> {
                 } catch (InterruptedException ex) {
                 }
             }
+            service.stop();
+            service.stopComponents();
             System.exit(0);
         } catch (ServiceException | InstantiationException | NoSuchMethodException | SecurityException |
                  IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
@@ -118,6 +116,24 @@ public abstract class Service<Conf> {
     }
 
     /**
+     * Stop the service components
+     *
+     * @throws ServiceException
+     */
+    private void stopComponents() throws ServiceException {
+        for (Class<? extends Component> clazz : getRequiredComponents()) {
+            if (components.containsKey(clazz)) {
+                try {
+                    stopComponent(clazz);
+                }
+                catch (ComponentException ex ) {
+                    error(ex, "Error stopping component %s (%s)", clazz.getSimpleName(), ex.getMessage());
+                }
+            }
+        }
+    }
+
+    /**
      * Start a specific component
      *
      * @param clazz The class of the component to start.
@@ -140,6 +156,17 @@ public abstract class Service<Conf> {
         } catch (NoSuchMethodException ex) {
             throw new ServiceException(format("Could not find constructor with Service as parameter on component of type '%s': %s", clazz.getSimpleName(), ex.getMessage()), ex);
         }
+    }
+
+    /**
+     * Stop a specific component
+     *
+     * @param clazz The class of the component to stop.
+     * @throws ServiceException
+     */
+    private <C extends Component> void stopComponent(Class<C> clazz) throws ServiceException {
+        C comp = (C) components.get(clazz);
+        comp.stop();
     }
 
     /**
@@ -243,6 +270,16 @@ public abstract class Service<Conf> {
      * @throws ServiceException Thrown if the service cannot be started
      */
     protected abstract void start() throws ServiceException;
+
+    /** Stop the service. This can be implemented by the implementation subclass to
+     * release resources, do cleanup or accomplish other shut down tasks.
+     *
+     * @throws ServiceException Thrown if there is a problem stopping the service
+     */
+    protected void stop() throws ServiceException {
+
+    }
+
 
     /**
      * Return the service configuration.

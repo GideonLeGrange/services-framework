@@ -67,6 +67,15 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         }
     }
 
+    @Override
+    public void stop() throws ComponentException {
+        try {
+            server.stop();
+        } catch (Exception e) {
+            throw new ComponentException(e.getMessage(), e);
+        }
+    }
+
     public void addEndpoints(String path, Set<Class<?>> endpoints) throws ComponentException {
         ResourceConfig rc = new ResourceConfig(endpoints);
 

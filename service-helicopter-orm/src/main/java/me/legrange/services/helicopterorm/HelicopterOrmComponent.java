@@ -53,6 +53,11 @@ public final class HelicopterOrmComponent extends Component<Service, HelicopterO
         }
     }
 
+    @Override
+    public void stop() throws ComponentException {
+        orm.close();
+    }
+
     public Orm getInstance() {
         return orm;
     }
