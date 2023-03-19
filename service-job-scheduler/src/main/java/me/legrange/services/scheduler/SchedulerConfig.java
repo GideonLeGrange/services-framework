@@ -1,14 +1,13 @@
 package me.legrange.services.scheduler;
 
-import java.util.List;
-import me.legrange.config.Configuration;
 import javax.validation.constraints.NotEmpty;
+import java.util.List;
 
 /**
  *
  * @author matthewl
  */
-public class SchedulerConfig extends Configuration {
+public final class SchedulerConfig {
     
     @NotEmpty(message="At least one job must be defined in the job scheduler")
     public List<JobConfig> jobs;

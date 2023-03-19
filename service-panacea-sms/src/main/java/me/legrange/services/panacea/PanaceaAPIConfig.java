@@ -1,13 +1,12 @@
 package me.legrange.services.panacea;
 
 import javax.validation.constraints.NotBlank;
-import me.legrange.config.Configuration;
 
 /**
  *
  * @author matthewl
  */
-public class PanaceaAPIConfig extends Configuration {
+public final class PanaceaAPIConfig {
 
     @NotBlank(message = "The Panacea API URL is required")
     private String apiURL;

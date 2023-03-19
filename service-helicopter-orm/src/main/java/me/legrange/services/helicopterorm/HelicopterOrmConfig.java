@@ -1,12 +1,10 @@
 package me.legrange.services.helicopterorm;
 
-import me.legrange.config.Configuration;
-
 /**
  *
  * @author matt-vm
  */
-public class HelicopterOrmConfig extends Configuration {
+public final class HelicopterOrmConfig{
 
     private boolean createMissingTables = false;
     private boolean rollbackOnUncommittedClose = false;
