@@ -27,6 +27,17 @@
             <artifactId>log</artifactId>
             <version>${log.version}</version>
         </dependency>
+        <!-- configuration validation. Exclude these in your project if they clash -->
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>6.0.13.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.el</artifactId>
+            <version>3.0.0</version>
+        </dependency>
     </dependencies>
     <name>Startable Service</name>
 </project>
