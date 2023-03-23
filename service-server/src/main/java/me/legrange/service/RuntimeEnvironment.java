@@ -36,7 +36,17 @@ public class RuntimeEnvironment {
      * Types of 'thought to be supported' operating systems.
      */
     public enum Type {
-        WINDOWS, LINUX, MACOS;
+        WINDOWS("Windows"), LINUX("Linux"), MACOS("MacOS");
+
+        private final String name;
+        Type(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
     }
 
     /**

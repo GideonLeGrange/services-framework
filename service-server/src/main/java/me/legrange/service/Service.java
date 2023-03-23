@@ -68,11 +68,11 @@ public abstract class Service<Conf> {
                 ex.printStackTrace();
                 failedStartup(String.format("Error configuring server: %s", ex.getMessage()));
             }
+            service.startComponents();
+            service.setupShutdownSignals();
             info("Platform is %s on %s %s", RuntimeEnvironment.getOsType().name(),
                     RuntimeEnvironment.getArch(),
                     RuntimeEnvironment.isInContainer() ? "running in a container" : "");
-            service.startComponents();
-            service.setupShutdownSignals();
             service.start();
             service.running = true;
             while (service.isRunning()) {
