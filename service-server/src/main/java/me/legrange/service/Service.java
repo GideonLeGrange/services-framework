@@ -2,6 +2,7 @@ package me.legrange.service;
 
 import me.legrange.config.ConfigurationException;
 import me.legrange.config.YamlLoader;
+import me.legrange.service.RuntimeEnvironment.Type;
 import sun.misc.Signal;
 
 import java.io.FileInputStream;
@@ -23,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import static java.lang.String.format;
 import static me.legrange.log.Log.critical;
 import static me.legrange.log.Log.error;
+import static me.legrange.log.Log.info;
 import static me.legrange.log.Log.warning;
 
 /**
@@ -66,6 +68,9 @@ public abstract class Service<Conf> {
                 ex.printStackTrace();
                 failedStartup(String.format("Error configuring server: %s", ex.getMessage()));
             }
+            info("Platform is %s on %s %s", RuntimeEnvironment.getOsType().name(),
+                    RuntimeEnvironment.getArch(),
+                    RuntimeEnvironment.isInContainer() ? "running in a container" : "");
             service.startComponents();
             service.setupShutdownSignals();
             service.start();
@@ -105,7 +110,6 @@ public abstract class Service<Conf> {
 
     /**
      * Start the service components
-     *
      */
     private void startComponents() throws ServiceException {
         for (Class<? extends Component> clazz : getRequiredComponents()) {
@@ -125,8 +129,7 @@ public abstract class Service<Conf> {
             if (components.containsKey(clazz)) {
                 try {
                     stopComponent(clazz);
-                }
-                catch (ComponentException ex ) {
+                } catch (ComponentException ex) {
                     error(ex, "Error stopping component %s (%s)", clazz.getSimpleName(), ex.getMessage());
                 }
             }
@@ -271,7 +274,8 @@ public abstract class Service<Conf> {
      */
     protected abstract void start() throws ServiceException;
 
-    /** Stop the service. This can be implemented by the implementation subclass to
+    /**
+     * Stop the service. This can be implemented by the implementation subclass to
      * release resources, do cleanup or accomplish other shut down tasks.
      *
      * @throws ServiceException Thrown if there is a problem stopping the service
@@ -316,7 +320,6 @@ public abstract class Service<Conf> {
 
     /**
      * Configure the server.
-     *
      */
     private void configure(InputStream config) throws ServiceException {
         try {
@@ -359,7 +362,6 @@ public abstract class Service<Conf> {
 
     /**
      * Determine what sub-class of Service is the actual service we want to run.
-     *
      */
     private static Class<? extends Service> determineServiceClass() throws ServiceException {
         Class[] classContext = new SecurityManager() {
@@ -387,12 +389,17 @@ public abstract class Service<Conf> {
     }
 
     private void setupShutdownSignals() {
-        String[] signals =  new String [] {"TERM", "INT", "HUP"};
+        String[] signals = RuntimeEnvironment.getOsType() == Type.WINDOWS ? new String[]{"TERM", "INT"} : new String[]{"TERM", "INT", "HUP"};
         for (String name : signals) {
-            Signal.handle(new Signal(name), sig -> {
-                warning("%s signal (%d) received; shutting down", sig.getName(), sig.getNumber());
-                running = false;
-            });
+            try {
+                Signal.handle(new Signal(name), sig -> {
+                    warning("%s signal (%d) received; shutting down", sig.getName(), sig.getNumber());
+                    running = false;
+                });
+            }
+            catch (IllegalArgumentException ex) {
+                warning("Cannot setup signal (%s)", ex.getMessage());
+            }
         }
     }
 
