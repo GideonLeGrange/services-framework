@@ -70,7 +70,7 @@ public abstract class Service<Conf> {
             }
             service.startComponents();
             service.setupShutdownSignals();
-            info("Platform is %s on %s %s", RuntimeEnvironment.getOsType().name(),
+            info("Platform is %s on %s %s", RuntimeEnvironment.getOsType(),
                     RuntimeEnvironment.getArch(),
                     RuntimeEnvironment.isInContainer() ? "running in a container" : "");
             service.start();

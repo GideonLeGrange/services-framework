@@ -38,14 +38,14 @@ public class RuntimeEnvironment {
     public enum Type {
         WINDOWS("Windows"), LINUX("Linux"), MACOS("MacOS");
 
-        private final String name;
-        Type(String name) {
-            this.name = name;
+        private final String description;
+        Type(String description) {
+            this.description = description;
         }
 
         @Override
         public String toString() {
-            return name;
+            return description;
         }
     }
 
