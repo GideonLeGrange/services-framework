@@ -22,7 +22,6 @@
         <module>service-panacea-sms</module>
         <module>service-jdbc</module>
         <module>service-mail</module>
-        <module>service-jooq</module>
         <module>service-helicopter-orm</module>
         <module>service-influxdb</module>
         <module>service-mongo</module>
