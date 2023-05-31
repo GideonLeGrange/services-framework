@@ -5,7 +5,7 @@ import com.heliorm.OrmException;
 import com.heliorm.sql.SqlDriver;
 import com.heliorm.sql.SqlOrmBuilder;
 import com.heliorm.sql.mysql.MySqlDriver;
-import com.heliorm.sql.postgresql.PostgreSqlDriver;
+import com.heliorm.sql.postgres.PostgreSqlDriver;
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;

@@ -4,7 +4,7 @@
     <parent>
         <groupId>me.legrange</groupId>
         <artifactId>services</artifactId>
-        <version>3.11.2</version>
+        <version>4.0.0</version>
     </parent>
     <groupId>me.legrange.services</groupId>
     <artifactId>service-helicopter-orm</artifactId>
@@ -12,7 +12,7 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <orm.version>0.99.3</orm.version>
+        <orm.version>0.99.4</orm.version>
     </properties>
     <name>Helicopter ORM Integration</name>
     
@@ -25,18 +25,6 @@
         <dependency>
             <groupId>com.heliorm</groupId>
             <artifactId>core</artifactId>
-            <version>${orm.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.heliorm</groupId>
-            <artifactId>mysql</artifactId>
-            <version>${orm.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.heliorm</groupId>
-            <artifactId>postgresql</artifactId>
             <version>${orm.version}</version>
             <scope>provided</scope>
         </dependency>

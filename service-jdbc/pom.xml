@@ -4,7 +4,7 @@
     <parent>
         <groupId>me.legrange</groupId>
         <artifactId>services</artifactId>
-        <version>3.11.2</version>
+        <version>4.0.0</version>
     </parent>
     <groupId>me.legrange.services</groupId>
     <artifactId>service-jdbc</artifactId>
@@ -24,11 +24,6 @@
         </plugins>
     </build>
     <dependencies>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.30</version>
-        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>service-server</artifactId>
