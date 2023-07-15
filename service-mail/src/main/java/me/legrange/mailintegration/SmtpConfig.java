@@ -1,7 +1,7 @@
 package me.legrange.mailintegration;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Positive;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 
 /**
  * Configuration object - RabbitMQ setup

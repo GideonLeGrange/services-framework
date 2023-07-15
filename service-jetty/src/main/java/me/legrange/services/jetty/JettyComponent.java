@@ -4,7 +4,6 @@ import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
 import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.NCSARequestLog;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.RequestLogHandler;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
@@ -14,8 +13,8 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.servlet.ServletContainer;
 
-import javax.servlet.DispatcherType;
-import javax.ws.rs.ext.MessageBodyWriter;
+import jakarta.servlet.DispatcherType;
+import jakarta.ws.rs.ext.MessageBodyWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -59,7 +58,7 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         try {
             context = makeContext();
             server = new Server(config.getPort());
-            server.setHandler(requestLog(gzip(context)));
+            server.setHandler(gzip(context));
             server.start();
             info("Started Jetty server on port %d", config.getPort());
         } catch (Exception ex) {
@@ -187,22 +186,6 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
         context.addFilter(ErrorFilter.class, "/*", EnumSet.allOf(DispatcherType.class));
-        return context;
-    }
-
-    private Handler requestLog(Handler context) {
-        if (config.getRequestLog() != null) {
-            RequestLogHandler requestLogHandler = new RequestLogHandler();
-            NCSARequestLog requestLog = new NCSARequestLog(config.getRequestLog());
-            requestLog.setRetainDays(90);
-            requestLog.setAppend(true);
-            requestLog.setExtended(false);
-            requestLog.setLogTimeZone("GMT");
-            requestLog.setLogLatency(true);
-            requestLogHandler.setRequestLog(requestLog);
-            requestLogHandler.setHandler(context);
-            return requestLogHandler;
-        }
         return context;
     }
 

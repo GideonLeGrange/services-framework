@@ -1,6 +1,6 @@
 package me.legrange.services.scheduler;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 /**
  *

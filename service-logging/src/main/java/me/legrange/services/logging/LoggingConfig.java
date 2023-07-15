@@ -2,7 +2,7 @@ package me.legrange.services.logging;
 
 import me.legrange.log.Level;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 

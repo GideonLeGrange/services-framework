@@ -1,6 +1,6 @@
 package me.legrange.service.mongo;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * @author GideonLeGrange

@@ -1,11 +1,12 @@
 package me.legrange.services.monitor;
 
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.QueryParam;
 import me.legrange.service.ComponentException;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
+
 import java.util.List;
 
 /**

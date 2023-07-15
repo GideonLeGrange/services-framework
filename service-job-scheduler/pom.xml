@@ -4,14 +4,12 @@
     <parent>
         <groupId>me.legrange</groupId>
         <artifactId>services</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0</version>
     </parent>
     <groupId>me.legrange.services</groupId>
     <artifactId>service-job-scheduler</artifactId>
     <packaging>jar</packaging>
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
         <cron4j.version>2.2.5</cron4j.version>
     </properties>
     <name>Job Scheduler</name>

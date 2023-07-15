@@ -4,39 +4,22 @@
      <parent>
         <groupId>me.legrange</groupId>
         <artifactId>services</artifactId>
-        <version>4.0.0</version>
+        <version>4.1.0</version>
     </parent>
     <groupId>me.legrange.services</groupId>
     <artifactId>service-server</artifactId>   
     <packaging>jar</packaging>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>me.legrange</groupId>
             <artifactId>yaml-config</artifactId>
-            <version>3.0.1</version>
+            <version>3.1.0</version>
         </dependency>
         <dependency>
             <groupId>me.legrange</groupId>
             <artifactId>log</artifactId>
             <version>${log.version}</version>
-        </dependency>
-        <!-- configuration validation. Exclude these in your project if they clash -->
-        <dependency>
-            <groupId>org.hibernate.validator</groupId>
-            <artifactId>hibernate-validator</artifactId>
-            <version>6.0.21.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.el</artifactId>
-            <version>3.0.0</version>
         </dependency>
     </dependencies>
     <name>Startable Service</name>
