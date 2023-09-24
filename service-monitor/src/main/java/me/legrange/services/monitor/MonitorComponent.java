@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 import static java.lang.String.format;
 import static me.legrange.log.Log.error;
 import static me.legrange.log.Log.info;
+import static me.legrange.log.Log.warning;
 
 /**
  * A service component that provides service monitoring.
@@ -30,9 +31,14 @@ public final class MonitorComponent extends Component<Service, MonitorConfig> im
     @Override
     public void start(MonitorConfig config) throws ComponentException {
         instance = this;
-        jetty().addProvider(GsonJerseyProvider.class);
-        jetty().addEndpoint(config.getPath(), StateEndpoint.class);
-        info("Monitoring available via HTTP on %s", config.getPath());
+        if (config.isEnabled()) {
+            jetty().addProvider(GsonJerseyProvider.class);
+            jetty().addEndpoint(config.getPath(), StateEndpoint.class);
+            info("Monitoring available via HTTP on %s", config.getPath());
+        }
+        else {
+            warning("Monitoring disabled");
+        }
     }
 
     /**
@@ -49,10 +55,10 @@ public final class MonitorComponent extends Component<Service, MonitorConfig> im
     }
 
     List<String> getMonitorNames() {
-        return new LinkedList(monitors.keySet());
+        return new LinkedList<>(monitors.keySet());
     }
 
-    final Object getMonitorState(String name, boolean flatten) throws ComponentException {
+    Object getMonitorState(String name, boolean flatten) throws ComponentException {
         Supplier<State> sup = monitors.get(name);
         if (sup == null) {
             throw new ComponentException(format("No monitor '%s' is defined", name));
@@ -68,7 +74,7 @@ public final class MonitorComponent extends Component<Service, MonitorConfig> im
         }
     }
 
-    final Object getMonitorState(String name, String variable) throws ComponentException {
+    Object getMonitorState(String name, String variable) throws ComponentException {
         Supplier<State> sup = monitors.get(name);
         if (sup == null) {
             throw new ComponentException(format("No monitor '%s' is defined", name));

@@ -63,18 +63,12 @@ public abstract class Service<Conf> {
             Class<? extends Service> serviceClass = determineServiceClass();
             Service service = serviceClass.getDeclaredConstructor().newInstance();
             try {
-                service.configure(config);
-            } catch (ServiceException ex) {
+                var conf = YamlLoader.readConfiguration(config, service.getConfigClass());
+                service.start(conf);
+            } catch (ServiceException | ConfigurationException ex) {
                 ex.printStackTrace();
                 failedStartup(String.format("Error configuring server: %s", ex.getMessage()));
             }
-            service.startComponents();
-            service.setupShutdownSignals();
-            info("Platform is %s on %s %s", RuntimeEnvironment.getOsType(),
-                    RuntimeEnvironment.getArch(),
-                    RuntimeEnvironment.isInContainer() ? "running in a container" : "");
-            service.start();
-            service.running = true;
             while (service.isRunning()) {
                 try {
                     TimeUnit.MILLISECONDS.sleep(500);
@@ -82,7 +76,6 @@ public abstract class Service<Conf> {
                 }
             }
             service.stop();
-            service.stopComponents();
             System.exit(0);
         } catch (ServiceException | InstantiationException | NoSuchMethodException | SecurityException |
                  IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
@@ -91,6 +84,23 @@ public abstract class Service<Conf> {
         } catch (FileNotFoundException ex) {
             error(ex, "Fatal error: %s", ex.getMessage());
         }
+    }
+
+    public final void start(Conf config) throws ServiceException {
+        this.conf = config;
+        startComponents();
+        setupShutdownSignals();
+        info("Platform is %s on %s %s", RuntimeEnvironment.getOsType(),
+                RuntimeEnvironment.getArch(),
+                RuntimeEnvironment.isInContainer() ? "running in a container" : "");
+        start();
+        running = true;
+    }
+
+    public final void stop() throws ServiceException {
+        running = false;
+        onStop();
+        stopComponents();
     }
 
     /**
@@ -121,7 +131,6 @@ public abstract class Service<Conf> {
 
     /**
      * Stop the service components
-     *
      */
     private void stopComponents() throws ServiceException {
         for (Class<? extends Component> clazz : getRequiredComponents()) {
@@ -278,7 +287,7 @@ public abstract class Service<Conf> {
      *
      * @throws ServiceException Thrown if there is a problem stopping the service
      */
-    protected void stop() throws ServiceException {
+    protected void onStop() throws ServiceException {
 
     }
 
@@ -360,7 +369,7 @@ public abstract class Service<Conf> {
      * Determine what sub-class of Service is the actual service we want to run.
      */
     private static Class<? extends Service> determineServiceClass() throws ServiceException {
-            Class[] classContext = new SecurityManager() {
+        Class[] classContext = new SecurityManager() {
             @Override
             public Class[] getClassContext() {
                 return super.getClassContext();
@@ -392,8 +401,7 @@ public abstract class Service<Conf> {
                     warning("%s signal (%d) received; shutting down", sig.getName(), sig.getNumber());
                     running = false;
                 });
-            }
-            catch (IllegalArgumentException ex) {
+            } catch (IllegalArgumentException ex) {
                 warning("Cannot setup signal (%s)", ex.getMessage());
             }
         }

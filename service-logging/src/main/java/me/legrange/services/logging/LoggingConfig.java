@@ -14,12 +14,12 @@ import java.util.Map;
 public class LoggingConfig {
     
     @NotNull(message="The log level must be specified")
-    private Level level;
+    private Level level = Level.INFO;
     private ConsonleLoggerConfig consoleLogger;
     private FileLoggerConfig fileLogger;
     private NumberedLoggerConfig numberedExceptionLogger;
     private CustomLoggerConfig customLogger;
-    private Map<String, Level> levels = new HashMap();
+    private Map<String, Level> levels = new HashMap<>();
 
     public Level getLevel() {
         return level;

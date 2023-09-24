@@ -15,7 +15,16 @@ public class JettyConfig {
 
     private boolean enableGzip = false;
 
-    private String requestLog;
+    private boolean enabled =  true;
+
+    public static JettyConfig disabled() {
+        var config = new JettyConfig();
+        config.enabled = false;
+        return config;
+    }
+
+    public JettyConfig() {
+    }
 
     public int getPort() {
         return port;
@@ -33,11 +42,7 @@ public class JettyConfig {
         this.enableGzip = enableGzip;
     }
 
-    public String getRequestLog() {
-        return requestLog;
-    }
-
-    public void setRequestLog(String requestLog) {
-        this.requestLog = requestLog;
+    public boolean isEnabled() {
+        return enabled;
     }
 }

@@ -55,23 +55,30 @@ public class JettyComponent extends Component<Service, JettyConfig> {
     @Override
     public void start(JettyConfig config) throws ComponentException {
         this.config = config;
-        try {
-            context = makeContext();
-            server = new Server(config.getPort());
-            server.setHandler(gzip(context));
-            server.start();
-            info("Started Jetty server on port %d", config.getPort());
-        } catch (Exception ex) {
-            throw new ComponentException(ex.getMessage(), ex);
+        if (config.isEnabled()) {
+            try {
+                context = makeContext();
+                server = new Server(config.getPort());
+                server.setHandler(gzip(context));
+                server.start();
+                info("Started Jetty server on port %d", config.getPort());
+            } catch (Exception ex) {
+                throw new ComponentException(ex.getMessage(), ex);
+            }
+        }
+        else {
+            warning("Jetty server disabled");
         }
     }
 
     @Override
     public void stop() throws ComponentException {
-        try {
-            server.stop();
-        } catch (Exception e) {
-            throw new ComponentException(e.getMessage(), e);
+        if(config.isEnabled()) {
+            try {
+                server.stop();
+            } catch (Exception e) {
+                throw new ComponentException(e.getMessage(), e);
+            }
         }
     }
 
