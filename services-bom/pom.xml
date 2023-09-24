@@ -8,6 +8,7 @@
         <artifactId>services</artifactId>
         <version>4.3.1</version>
     </parent>
+    <name>Services BOM</name>
 
     <groupId>me.legrange</groupId>
     <artifactId>services-bom</artifactId>
