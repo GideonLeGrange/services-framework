@@ -5,7 +5,7 @@ package me.legrange.service;
  * 
  * @author gideon
  */
-public class ComponentException extends ServiceException {
+public final class ComponentException extends ServiceException {
 
     public ComponentException(String message) {
         super(message);

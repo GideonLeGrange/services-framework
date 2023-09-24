@@ -21,7 +21,7 @@ import static java.lang.String.format;
 /**
  * A utility class that provides access to OS/runtime environment relate information and operations.
  */
-public class RuntimeEnvironment {
+public final class RuntimeEnvironment {
 
     private static final String OS_NAME = "os.name";
     private static final String OS_ARCH = "os.arch";

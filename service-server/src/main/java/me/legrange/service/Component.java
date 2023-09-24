@@ -51,7 +51,6 @@ public abstract class Component<S extends Service, C> {
      * but if a component does not require any configuration, it can be overriden to return false
      * which will cause the system not to try to locate it's configuration.
      *
-     * @return
      */
     public boolean requiresConfig(){
         return true;

@@ -78,7 +78,7 @@ public abstract class Service<Conf> {
             while (service.isRunning()) {
                 try {
                     TimeUnit.MILLISECONDS.sleep(500);
-                } catch (InterruptedException ex) {
+                } catch (InterruptedException ignored) {
                 }
             }
             service.stop();
@@ -122,7 +122,6 @@ public abstract class Service<Conf> {
     /**
      * Stop the service components
      *
-     * @throws ServiceException
      */
     private void stopComponents() throws ServiceException {
         for (Class<? extends Component> clazz : getRequiredComponents()) {
@@ -165,7 +164,6 @@ public abstract class Service<Conf> {
      * Stop a specific component
      *
      * @param clazz The class of the component to stop.
-     * @throws ServiceException
      */
     private <C extends Component> void stopComponent(Class<C> clazz) throws ServiceException {
         C comp = (C) components.get(clazz);
@@ -304,9 +302,7 @@ public abstract class Service<Conf> {
             try {
                 task.run();
             } catch (Throwable ex) {
-                String name = task.getClass().getSimpleName();
-                name = (name == null) ? task.getClass().getName() : name;
-                critical(ex, "Uncaught exception in task '%s': %s", name, ex.getMessage());
+                critical(ex, "Uncaught exception in task '%s': %s", task.getClass().getSimpleName(), ex.getMessage());
             }
         });
     }
@@ -314,7 +310,7 @@ public abstract class Service<Conf> {
     public final void sleep(int seconds) {
         try {
             TimeUnit.SECONDS.sleep(seconds);
-        } catch (InterruptedException ex) {
+        } catch (InterruptedException ignored) {
         }
     }
 
@@ -364,7 +360,7 @@ public abstract class Service<Conf> {
      * Determine what sub-class of Service is the actual service we want to run.
      */
     private static Class<? extends Service> determineServiceClass() throws ServiceException {
-        Class[] classContext = new SecurityManager() {
+            Class[] classContext = new SecurityManager() {
             @Override
             public Class[] getClassContext() {
                 return super.getClassContext();

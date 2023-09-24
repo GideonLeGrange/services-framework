@@ -1,6 +1,6 @@
 package me.legrange.service;
 
-public class ComponentNotFoundException extends RuntimeException {
+public final class ComponentNotFoundException extends RuntimeException {
 
     public ComponentNotFoundException(String message) {
         super(message);
