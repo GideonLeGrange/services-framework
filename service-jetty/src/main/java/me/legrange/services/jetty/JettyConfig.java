@@ -14,8 +14,8 @@ public class JettyConfig {
     private int port;
 
     private boolean enableGzip = false;
-
     private boolean enabled =  true;
+    private boolean standardErrorFilter = true;
 
     public static JettyConfig disabled() {
         var config = new JettyConfig();
@@ -23,26 +23,20 @@ public class JettyConfig {
         return config;
     }
 
-    public JettyConfig() {
-    }
-
     public int getPort() {
         return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
     }
 
     public boolean isEnableGzip() {
         return enableGzip;
     }
 
-    public void setEnableGzip(boolean enableGzip) {
-        this.enableGzip = enableGzip;
-    }
-
     public boolean isEnabled() {
         return enabled;
     }
+
+    public boolean isStandardErrorFilter() {
+        return standardErrorFilter;
+    }
+
 }

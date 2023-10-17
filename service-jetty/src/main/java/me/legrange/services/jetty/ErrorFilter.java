@@ -1,12 +1,13 @@
 package me.legrange.services.jetty;
 
-import java.io.IOException;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
+
+import java.io.IOException;
 
 import static me.legrange.log.Log.error;
 
@@ -19,7 +20,7 @@ import static me.legrange.log.Log.error;
 public class ErrorFilter implements Filter {
 
     @Override
-    public void init(FilterConfig fc) throws ServletException {
+    public void init(FilterConfig fc) {
     }
 
     @Override

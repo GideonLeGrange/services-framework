@@ -1,11 +1,12 @@
 package me.legrange.services.jetty;
 
+import jakarta.servlet.DispatcherType;
+import jakarta.ws.rs.ext.MessageBodyWriter;
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.RequestLogHandler;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -13,8 +14,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.servlet.ServletContainer;
 
-import jakarta.servlet.DispatcherType;
-import jakarta.ws.rs.ext.MessageBodyWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -65,15 +64,14 @@ public class JettyComponent extends Component<Service, JettyConfig> {
             } catch (Exception ex) {
                 throw new ComponentException(ex.getMessage(), ex);
             }
-        }
-        else {
+        } else {
             warning("Jetty server disabled");
         }
     }
 
     @Override
     public void stop() throws ComponentException {
-        if(config.isEnabled()) {
+        if (config.isEnabled()) {
             try {
                 server.stop();
             } catch (Exception e) {
@@ -177,7 +175,7 @@ public class JettyComponent extends Component<Service, JettyConfig> {
      * Check for a MessageBodyWriter
      */
     private void checkForMessageBodyWriter() throws ComponentException {
-        if (!findMessageBodyWriter().isPresent()) {
+        if (findMessageBodyWriter().isEmpty()) {
             throw new ComponentException("No MessageBodyWriters were registered for serialization. Remember to register them using the addProvider methods");
         }
     }
@@ -192,7 +190,9 @@ public class JettyComponent extends Component<Service, JettyConfig> {
     private ServletContextHandler makeContext() {
         context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
-        context.addFilter(ErrorFilter.class, "/*", EnumSet.allOf(DispatcherType.class));
+        if (config.isStandardErrorFilter()) {
+            context.addFilter(ErrorFilter.class, "/*", EnumSet.allOf(DispatcherType.class));
+        }
         return context;
     }
 
