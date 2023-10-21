@@ -3,17 +3,15 @@ package me.legrange.services.jetty;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerResponseContext;
 import jakarta.ws.rs.container.ContainerResponseFilter;
-import java.io.IOException;
 
 /**
  * Set up request filtering. Mainly used to control Cross Origin (CORS)
  *
  */
-public class ResponseFilter implements ContainerResponseFilter {
+public final class ResponseFilter implements ContainerResponseFilter {
 
     @Override
-    public void filter(ContainerRequestContext request,
-                       ContainerResponseContext response) throws IOException {
+    public void filter(ContainerRequestContext request, ContainerResponseContext response) {
         response.getHeaders().add("Access-Control-Allow-Origin", "*");
         response.getHeaders().add("Access-Control-Allow-Headers", "origin, content-type, accept, authorization, content-disposition");
         response.getHeaders().add("Access-Control-Expose-Headers", "Content-Disposition");

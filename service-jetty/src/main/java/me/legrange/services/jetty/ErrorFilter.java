@@ -17,7 +17,7 @@ import static me.legrange.log.Log.error;
  * 
  * @author gideon
  */
-public class ErrorFilter implements Filter {
+public final class ErrorFilter implements Filter {
 
     @Override
     public void init(FilterConfig fc) {
