@@ -32,16 +32,16 @@ import static me.legrange.log.Log.warning;
  *
  * @author gideon
  */
-public class JettyComponent extends Component<Service, JettyConfig> {
+public class JettyComponent extends Component<Service<?>, JettyConfig> {
 
     private Server server;
     private ServletContextHandler context;
     private boolean running = false;
-    private final Set<Object> jerseyProviders = new HashSet();
+    private final Set<Object> jerseyProviders = new HashSet<>();
     private final Map<String, Set<Class<?>>> endpoints = new HashMap<>();
     private JettyConfig config;
 
-    public JettyComponent(Service service) {
+    public JettyComponent(Service<?> service) {
         super(service);
     }
 
@@ -112,7 +112,7 @@ public class JettyComponent extends Component<Service, JettyConfig> {
      * @param path     The path
      * @param endpoint The endpoint class
      */
-    public void addEndpoint(String path, Class endpoint) throws ComponentException {
+    public void addEndpoint(String path, Class<?> endpoint) throws ComponentException {
         ResourceConfig rc = new ResourceConfig(endpoint);
         checkForMessageBodyWriter();
         for (Object provider : jerseyProviders) {
@@ -134,7 +134,7 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         running = true;
     }
 
-    public void addProvider(Class provider) throws ComponentException {
+    public void addProvider(Class<?> provider) throws ComponentException {
         try {
             addProvider(provider.getConstructor().newInstance());
         } catch (NoSuchMethodException e) {
@@ -145,8 +145,8 @@ public class JettyComponent extends Component<Service, JettyConfig> {
     }
 
     public void addProvider(Object provider) throws ComponentException {
-        if (MessageBodyWriter.class.isInstance(provider)) {
-            Optional<? extends MessageBodyWriter> mbr = findMessageBodyWriter();
+        if (provider instanceof MessageBodyWriter) {
+            Optional<? extends MessageBodyWriter<?>> mbr = findMessageBodyWriter();
             if (mbr.isPresent()) {
                 jerseyProviders.remove(mbr.get());
                 warning("Replacing message body writer '%s' with '%s'",
@@ -180,10 +180,10 @@ public class JettyComponent extends Component<Service, JettyConfig> {
         }
     }
 
-    private Optional<? extends MessageBodyWriter> findMessageBodyWriter() {
+    private Optional<? extends MessageBodyWriter<?>> findMessageBodyWriter() {
         return jerseyProviders.stream()
-                .filter(p -> MessageBodyWriter.class.isInstance(p))
-                .map(p -> (MessageBodyWriter) p)
+                .filter(MessageBodyWriter.class::isInstance)
+                .map(p -> (MessageBodyWriter<?>) p)
                 .findFirst();
     }
 
