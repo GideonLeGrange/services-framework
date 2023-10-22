@@ -10,6 +10,7 @@ import jakarta.servlet.ServletResponse;
 import java.io.IOException;
 
 import static me.legrange.log.Log.error;
+import static me.legrange.log.Log.info;
 
 /**
  * A filter that catches ServletExceptions (thrown when user code has
@@ -20,11 +21,8 @@ import static me.legrange.log.Log.error;
 public final class ErrorFilter implements Filter {
 
     @Override
-    public void init(FilterConfig fc) {
-    }
-
-    @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain fc) throws IOException, ServletException {
+        info("ErrorFilter");
         try {
             fc.doFilter(req, res);
         } catch (ServletException ex) {
@@ -43,10 +41,6 @@ public final class ErrorFilter implements Filter {
             error(ex, "Unexpected error (%s)", ex.getMessage(), ex);
             throw new ServletException(ex.getMessage(), ex);
         }
-    }
-
-    @Override
-    public void destroy() {
     }
 
 }

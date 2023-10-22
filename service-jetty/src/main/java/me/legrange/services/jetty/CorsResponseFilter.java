@@ -8,7 +8,7 @@ import jakarta.ws.rs.container.ContainerResponseFilter;
  * Set up request filtering. Mainly used to control Cross Origin (CORS)
  *
  */
-public final class ResponseFilter implements ContainerResponseFilter {
+public final class CorsResponseFilter implements ContainerResponseFilter {
 
     @Override
     public void filter(ContainerRequestContext request, ContainerResponseContext response) {

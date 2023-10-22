@@ -18,6 +18,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -194,7 +195,7 @@ public class JettyComponent extends Component<Service<?>, JettyConfig> {
         context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
         if (config.isStandardErrorFilter()) {
-            context.addFilter(ErrorFilter.class, "/*", EnumSet.allOf(DispatcherType.class));
+            context.addFilter(ErrorFilter.class, "/*", EnumSet.of(DispatcherType.ERROR));
         }
         return context;
     }
