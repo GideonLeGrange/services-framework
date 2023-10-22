@@ -24,9 +24,9 @@ public final class ErrorFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest sr, ServletResponse sr1, FilterChain fc) throws IOException, ServletException {
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain fc) throws IOException, ServletException {
         try {
-            fc.doFilter(sr, sr1);
+            fc.doFilter(req, res);
         } catch (ServletException ex) {
             if (ex.getCause() != null) {
                 error(ex.getCause(), "Unhandled exception in REST endpoint: %s", ex.getCause());
