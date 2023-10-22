@@ -4,7 +4,7 @@
     <parent>
         <groupId>me.legrange.services</groupId>
         <artifactId>services</artifactId>
-        <version>4.3.2</version>
+        <version>4.3.3</version>
     </parent>
     <groupId>me.legrange.services</groupId>
     <artifactId>service-mail</artifactId>
