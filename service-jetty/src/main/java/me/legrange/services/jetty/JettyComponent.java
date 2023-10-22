@@ -15,10 +15,12 @@ import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -37,7 +39,7 @@ public class JettyComponent extends Component<Service<?>, JettyConfig> {
     private Server server;
     private ServletContextHandler context;
     private boolean running = false;
-    private final Set<Object> jerseyProviders = new HashSet<>();
+    private final List<Object> jerseyProviders = new ArrayList<>();
     private final Map<String, Set<Class<?>>> endpoints = new HashMap<>();
     private JettyConfig config;
 
@@ -148,10 +150,12 @@ public class JettyComponent extends Component<Service<?>, JettyConfig> {
         if (provider instanceof MessageBodyWriter) {
             Optional<? extends MessageBodyWriter<?>> mbr = findMessageBodyWriter();
             if (mbr.isPresent()) {
-                jerseyProviders.remove(mbr.get());
-                warning("Replacing message body writer '%s' with '%s'",
-                        mbr.get().getClass().getSimpleName(),
-                        provider.getClass().getName());
+                if (mbr.get() instanceof GsonJerseyProvider) {
+                    jerseyProviders.remove(mbr.get());
+                    warning("Replacing message body writer '%s' with '%s'",
+                            mbr.get().getClass().getSimpleName(),
+                            provider.getClass().getName());
+                }
             }
         }
         jerseyProviders.add(provider);

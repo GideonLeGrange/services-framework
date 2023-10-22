@@ -13,8 +13,8 @@ import static me.legrange.log.Log.error;
 
 /**
  * A filter that catches ServletExceptions (thrown when user code has
- * generated an error) and logs them. 
- * 
+ * generated an error) and logs them.
+ *
  * @author gideon
  */
 public final class ErrorFilter implements Filter {
@@ -25,22 +25,28 @@ public final class ErrorFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest sr, ServletResponse sr1, FilterChain fc) throws IOException, ServletException {
-        try { 
+        try {
             fc.doFilter(sr, sr1);
-        }
-        catch ( ServletException ex) {
+        } catch (ServletException ex) {
             if (ex.getCause() != null) {
                 error(ex.getCause(), "Unhandled exception in REST endpoint: %s", ex.getCause());
-            }
-            else {
+            } else {
                 error(ex, "Unhandled exception in REST endpoint: %s", ex.getMessage());
             }
             throw ex;
+        }
+        catch (IOException ex) {
+            error(ex, "IO error (%s)", ex.getMessage(), ex);
+            throw ex;
+        }
+        catch (Exception ex) {
+            error(ex, "Unexpected error (%s)", ex.getMessage(), ex);
+            throw new ServletException(ex.getMessage(), ex);
         }
     }
 
     @Override
     public void destroy() {
     }
-    
+
 }
