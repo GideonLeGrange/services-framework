@@ -4,13 +4,12 @@
     <parent>
         <groupId>me.legrange.services</groupId>
         <artifactId>services</artifactId>
-        <version>4.3.3</version>
+        <version>4.3.4</version>
     </parent>
-    <groupId>me.legrange.services</groupId>
     <artifactId>service-helicopter-orm</artifactId>
     <packaging>jar</packaging>
     <properties>
-        <orm.version>0.99.4</orm.version>
+        <orm.version>0.99.5</orm.version>
     </properties>
     <name>Helicopter ORM Integration</name>
     
