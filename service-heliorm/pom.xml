@@ -4,9 +4,9 @@
     <parent>
         <groupId>me.legrange.services</groupId>
         <artifactId>services</artifactId>
-        <version>4.3.4</version>
+        <version>4.4.0</version>
     </parent>
-    <artifactId>service-helicopter-orm</artifactId>
+    <artifactId>service-heliorm</artifactId>
     <packaging>jar</packaging>
     <properties>
         <orm.version>0.99.5</orm.version>

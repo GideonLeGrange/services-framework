@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>me.legrange.services</groupId>
     <artifactId>services</artifactId>
-    <version>4.3.4</version>
+    <version>4.4.0</version>
     <packaging>pom</packaging>
     <modules>
         <module>service-server</module>
@@ -16,7 +16,7 @@
         <module>service-panacea-sms</module>
         <module>service-jdbc</module>
         <module>service-mail</module>
-        <module>service-helicopter-orm</module>
+        <module>service-heliorm</module>
         <module>service-influxdb</module>
         <module>service-mongo</module>
         <module>service-letsencrypt</module>

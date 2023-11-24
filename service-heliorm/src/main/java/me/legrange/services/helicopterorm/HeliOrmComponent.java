@@ -2,6 +2,7 @@ package me.legrange.services.helicopterorm;
 
 import com.heliorm.Orm;
 import com.heliorm.OrmException;
+import com.heliorm.UncaughtOrmException;
 import com.heliorm.sql.SqlDriver;
 import com.heliorm.sql.SqlOrmBuilder;
 import com.heliorm.sql.mysql.MySqlDriver;
@@ -13,21 +14,23 @@ import me.legrange.services.jdbc.ConnectionPoolException;
 import me.legrange.services.jdbc.JdbcComponent;
 import me.legrange.services.jdbc.WithJdbc;
 
+import java.lang.reflect.Proxy;
+
 import static java.lang.String.format;
 
 /**
  * @author matt-vm
  */
-public final class HelicopterOrmComponent extends Component<Service, HelicopterOrmConfig> implements WithJdbc {
+public final class HeliOrmComponent extends Component<Service, HeliOrmConfig> implements WithJdbc {
 
-    private Orm orm;
+    private OrmPool pool;
 
-    public HelicopterOrmComponent(Service service) {
+    public HeliOrmComponent(Service service) {
         super(service);
     }
 
     @Override
-    public void start(HelicopterOrmConfig config) throws ComponentException {
+    public void start(HeliOrmConfig config) throws ComponentException {
         try {
             String dialect = getComponent(JdbcComponent.class).getDialect();
             Class<? extends SqlDriver> driverClass;
@@ -41,11 +44,7 @@ public final class HelicopterOrmComponent extends Component<Service, HelicopterO
                 default:
                     throw new ComponentException(format("Unsupported driver type '%s'", dialect));
             }
-            orm = SqlOrmBuilder.create(() -> jdbc().getConnection(), driverClass)
-                    .setCreateMissingTables(config.isCreateMissingTables())
-                    .setRollbackOnUncommittedClose(config.isRollbackOnUncommittedClose())
-                    .setUseUnionAll(config.isUseUnionAll())
-                    .build();
+            pool = new OrmPool(jdbc(), driverClass, config);
         } catch (ConnectionPoolException | OrmException ex) {
             throw new ComponentException(ex.getMessage(), ex);
         } catch (IllegalArgumentException ex) {
@@ -54,12 +53,13 @@ public final class HelicopterOrmComponent extends Component<Service, HelicopterO
     }
 
     @Override
-    public void stop() throws ComponentException {
-        orm.close();
+    public void stop() {
+        pool.close();
     }
 
     public Orm getInstance() {
-        return orm;
+        return (Orm) Proxy.newProxyInstance(HeliOrmComponent.class.getClassLoader(),
+                new Class[]{Orm.class}, new ProxyOrm(pool));
     }
 
     @Override

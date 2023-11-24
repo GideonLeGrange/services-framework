@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import static java.lang.String.format;
 
 public final class ConnectionPool {
-    private static HikariConfig config = new HikariConfig();
+    private static final HikariConfig config = new HikariConfig();
     private static HikariDataSource ds;
 
     ConnectionPool(JdbcConfig conf) {

@@ -4,7 +4,7 @@ package me.legrange.services.helicopterorm;
  *
  * @author matt-vm
  */
-public final class HelicopterOrmConfig{
+public final class HeliOrmConfig {
 
     private boolean createMissingTables = false;
     private boolean rollbackOnUncommittedClose = false;
