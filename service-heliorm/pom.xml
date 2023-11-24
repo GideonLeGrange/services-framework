@@ -9,7 +9,7 @@
     <artifactId>service-heliorm</artifactId>
     <packaging>jar</packaging>
     <properties>
-        <orm.version>0.99.5</orm.version>
+        <orm.version>0.99.7</orm.version>
     </properties>
     <name>Helicopter ORM Integration</name>
     
