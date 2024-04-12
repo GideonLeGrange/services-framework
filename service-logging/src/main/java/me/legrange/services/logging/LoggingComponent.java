@@ -18,11 +18,11 @@ import static java.lang.String.format;
 /**
  * @author gideon
  */
-public class LoggingComponent extends Component<Service , LoggingConfig> {
+public class LoggingComponent extends Component<Service<?>, LoggingConfig> {
 
     private Logger logger;
 
-    public LoggingComponent(Service service) {
+    public LoggingComponent(Service<?> service) {
         super(service);
     }
 
@@ -34,9 +34,9 @@ public class LoggingComponent extends Component<Service , LoggingConfig> {
             if (config.getFileLogger() != null) {
                 logger = startFileLogger(config.getFileLogger());
             } else if (config.getConsoleLogger() != null) {
-                logger = startConsoleLogger(config.getConsoleLogger());
+                logger = startConsoleLogger();
             } else {
-                throw new ComponentException(format("No primary logger defined. Check your configuration!"));
+                throw new ComponentException("No primary logger defined. Check your configuration!");
             }
             NumberedLoggerConfig nelc = config.getNumberedExceptionLogger();
             if (nelc != null) {
@@ -82,7 +82,7 @@ public class LoggingComponent extends Component<Service , LoggingConfig> {
         return new FileLogger(flc.getFileName());
     }
 
-    private Logger startConsoleLogger(ConsonleLoggerConfig clc) throws LoggerException {
+    private Logger startConsoleLogger() throws LoggerException {
         return new ConsoleLogger();
     }
 
@@ -99,7 +99,6 @@ public class LoggingComponent extends Component<Service , LoggingConfig> {
      * @param logger The logger we have
      * @param clc    The config
      * @return The new logger chained to the one we had
-     * @throws LoggerException
      */
     private Logger startCustomLogger(Logger logger, CustomLoggerConfig clc) throws LoggerException {
         try {
