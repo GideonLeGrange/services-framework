@@ -6,7 +6,6 @@
         <artifactId>services</artifactId>
         <version>4.4.0</version>
     </parent>
-    <groupId>me.legrange.services</groupId>
     <artifactId>service-job-scheduler</artifactId>
     <packaging>jar</packaging>
     <properties>

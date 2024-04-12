@@ -6,8 +6,7 @@
         <artifactId>services</artifactId>
         <version>4.4.0</version>
     </parent>
-    <groupId>me.legrange.services</groupId>
-    <artifactId>service-server</artifactId>   
+    <artifactId>service-server</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>

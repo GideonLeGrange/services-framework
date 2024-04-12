@@ -6,11 +6,10 @@
         <artifactId>services</artifactId>
         <version>4.4.0</version>
     </parent>
-    <groupId>me.legrange.services</groupId>
     <artifactId>service-panacea-sms</artifactId>
     <packaging>jar</packaging>
     <properties>
-        <retrofit.version>2.5.0</retrofit.version>
+        <retrofit.version>2.11.0</retrofit.version>
     </properties>
     <name>Panacea SMS Integration</name>
     
