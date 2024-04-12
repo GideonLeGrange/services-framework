@@ -18,7 +18,7 @@ import static java.lang.String.format;
 /**
  * @author gideon
  */
-public class LoggingComponent extends Component<Service, LoggingConfig> {
+public class LoggingComponent extends Component<Service , LoggingConfig> {
 
     private Logger logger;
 
