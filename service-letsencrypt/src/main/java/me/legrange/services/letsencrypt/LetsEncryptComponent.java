@@ -29,25 +29,25 @@ import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
 
-public final class LetsEncryptComponent extends Component<Service, LetsEncryptConfig> implements WithJetty, WithLogging {
+public final class LetsEncryptComponent extends Component<Service<?>, LetsEncryptConfig> implements WithJetty, WithLogging {
 
     private static LetsEncryptComponent instance;
     private LetsEncryptConfig config;
-    private Map<String, String> challengeResponses = new ConcurrentHashMap();
+    private final Map<String, String> challengeResponses = new ConcurrentHashMap<>();
 
-    public LetsEncryptComponent(Service service) {
+    public LetsEncryptComponent(Service<?> service) {
         super(service);
     }
 
     @Override
     public void start(LetsEncryptConfig config) throws ComponentException {
         this.config = config;
-        this.instance = this;
+        instance = this;
         jetty().addEndpoint("/.well-known/acme-challenge", ChallengeEndpoint.class);
         if (hasCertificate()) {
             try {
                 activateCertificate();
-            } catch (LetsEcryptException e) {
+            } catch (LetsEncryptException e) {
                 throw new ComponentException(e.getMessage(), e);
             }
             service().submit(this::scheduleRenewalCheck);
@@ -72,8 +72,8 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
     /**
      * Activate the certificate
      */
-    private void activateCertificate() throws LetsEcryptException {
-        throw new LetsEcryptException("Not yet implemented");
+    private void activateCertificate() throws LetsEncryptException {
+        throw new LetsEncryptException("Not yet implemented");
     }
 
     /**
@@ -84,7 +84,7 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
         try {
             try {
                 TimeUnit.SECONDS.sleep(10);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException ignored) {
             }
             KeyPair keyPair;
             if (!hasKeys()) {
@@ -95,7 +95,7 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
             Account account = createAccount(keyPair, hasAcmeUrl());
             Order order = createOrder(account);
             createCsr(order);
-        } catch (LetsEcryptException ex) {
+        } catch (LetsEncryptException ex) {
             error(ex);
         }
     }
@@ -105,13 +105,13 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
      *
      * @param order The order to use
      */
-    private void downloadCertificate(Order order) throws LetsEcryptException {
+    private void downloadCertificate(Order order) throws LetsEncryptException {
         debug("downloadCertificate()");
         try {
             while (order.getStatus() != Status.VALID) {
                 try {
                     TimeUnit.SECONDS.sleep(3);
-                } catch (InterruptedException e) {
+                } catch (InterruptedException ignored) {
                 }
                 order.update();
             }
@@ -120,7 +120,7 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
                 cert.writeCertificate(fw);
             }
         } catch (AcmeException | IOException ex) {
-            throw new LetsEcryptException(format("Error downloading certificate for '%s' (%s)", config.getDomain(), ex.getMessage()));
+            throw new LetsEncryptException(format("Error downloading certificate for '%s' (%s)", config.getDomain(), ex.getMessage()));
         }
     }
 
@@ -128,9 +128,8 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
      * Create a new certificate
      *
      * @param order The order to use
-     * @throws LetsEcryptException
      */
-    private void createCsr(Order order) throws LetsEcryptException {
+    private void createCsr(Order order) throws LetsEncryptException {
         debug("createCsr()");
         KeyPair domainKeyPair = KeyPairUtils.createKeyPair(2048);
         CSRBuilder csrb = new CSRBuilder();
@@ -143,17 +142,15 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
             csrb.write(new FileWriter(getCertificateFileName()));
             order.execute(csr);
         } catch (IOException | AcmeException ex) {
-            throw new LetsEcryptException(format("Error creating certificate for '%s' (%s)", config.getDomain(), ex.getMessage()), ex);
+            throw new LetsEncryptException(format("Error creating certificate for '%s' (%s)", config.getDomain(), ex.getMessage()), ex);
         }
     }
 
     /**
      * Create a Let's Encrypt certificate order
      *
-     * @param account
-     * @return
      */
-    private Order createOrder(Account account) throws LetsEcryptException {
+    private Order createOrder(Account account) throws LetsEncryptException {
         debug("createOrder()");
         try {
             Order order = account.newOrder()
@@ -161,21 +158,24 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
                     .create();
             for (Authorization auth : order.getAuthorizations()) {
                 if (auth.getStatus() != Status.VALID) {
-                    Http01Challenge challenge = auth.findChallenge(Http01Challenge.TYPE);
-                    challengeResponses.put(challenge.getToken(), challenge.getAuthorization());
-                    challenge.trigger();
+                    var opt = auth.findChallenge(Http01Challenge.class);
+                    if (opt.isPresent()) {
+                        var challenge = opt.get();
+                        challengeResponses.put(challenge.getToken(), challenge.getAuthorization());
+                        challenge.trigger();
+                    }
                 }
                 while (auth.getStatus() != Status.VALID) {
                     try {
                         TimeUnit.SECONDS.sleep(3);
-                    } catch (InterruptedException e) {
+                    } catch (InterruptedException ignored) {
                     }
                     auth.update();
                 }
             }
             return order;
         } catch (AcmeException ex) {
-            throw new LetsEcryptException(format("Error creating certificate order for '%s' (%s)", config.getDomain(), ex.getMessage()), ex);
+            throw new LetsEncryptException(format("Error creating certificate order for '%s' (%s)", config.getDomain(), ex.getMessage()), ex);
         }
     }
 
@@ -184,9 +184,8 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
      *
      * @param keyPair Key pair to use to create account
      * @return The account
-     * @throws LetsEcryptException
      */
-    private Account createAccount(KeyPair keyPair, boolean onlyExisting) throws LetsEcryptException {
+    private Account createAccount(KeyPair keyPair, boolean onlyExisting) throws LetsEncryptException {
         debug("createAccount()");
         Session session = new Session(config.getLetsEncryptUrl());
         try {
@@ -200,35 +199,35 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
                 try (FileWriter out = new FileWriter(getUrlFileName())) {
                     out.write(account.getLocation().toString());
                 } catch (IOException e) {
-                    throw new LetsEcryptException(format("Error storing account in %s (%s)", getUrlFileName(), e.getMessage()), e);
+                    throw new LetsEncryptException(format("Error storing account in %s (%s)", getUrlFileName(), e.getMessage()), e);
                 }
             }
             return account;
         } catch (AcmeException e) {
-            throw new LetsEcryptException(format("Error creating account on %s (%s)", config.getLetsEncryptUrl(), e.getMessage()), e);
+            throw new LetsEncryptException(format("Error creating account on %s (%s)", config.getLetsEncryptUrl(), e.getMessage()), e);
         }
     }
 
     /**
      * Obtain Let's Encrypt keys
      */
-    private KeyPair obtainKeys() throws LetsEcryptException {
+    private KeyPair obtainKeys() throws LetsEncryptException {
         debug("obtainKeys()");
         KeyPair accountKeyPair = KeyPairUtils.createKeyPair(2048);
         try (FileWriter fw = new FileWriter(getKeyFileName())) {
             KeyPairUtils.writeKeyPair(accountKeyPair, fw);
         } catch (IOException e) {
-            throw new LetsEcryptException(format("Error writing key pair to file '%s' (%s)", getKeyFileName(), e.getMessage()), e);
+            throw new LetsEncryptException(format("Error writing key pair to file '%s' (%s)", getKeyFileName(), e.getMessage()), e);
         }
         return accountKeyPair;
     }
 
-    private KeyPair loadKeys() throws LetsEcryptException {
+    private KeyPair loadKeys() throws LetsEncryptException {
         debug("loadKeys()");
         try {
             return KeyPairUtils.readKeyPair(new FileReader(getKeyFileName()));
         } catch (IOException e) {
-            throw new LetsEcryptException(format("Error loading key pair from file '%s' (%s)", getKeyFileName(), e.getMessage()), e);
+            throw new LetsEncryptException(format("Error loading key pair from file '%s' (%s)", getKeyFileName(), e.getMessage()), e);
         }
     }
 

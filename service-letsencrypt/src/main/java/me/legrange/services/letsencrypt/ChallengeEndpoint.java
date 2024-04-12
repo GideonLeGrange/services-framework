@@ -11,11 +11,11 @@ public class ChallengeEndpoint {
 
     @GET
     @Path("{token}")
-    public String getChallengeResponse(@PathParam("token") final String token) throws LetsEcryptException {
+    public String getChallengeResponse(@PathParam("token") final String token) throws LetsEncryptException {
         Optional<String> response = LetsEncryptComponent.getInstance().getChallengeResponse(token);
         if (response.isPresent()) {
             return response.get();
         }
-        throw new LetsEcryptException("Cannot find response for challenge");
+        throw new LetsEncryptException("Cannot find response for challenge");
     }
 }
