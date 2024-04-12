@@ -9,12 +9,11 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>me.legrange.services</groupId>
     <artifactId>service-letsencrypt</artifactId>
     <name>Let's Encrypt Integration</name>
 
     <properties>
-        <acme4j.version>2.14</acme4j.version>
+        <acme4j.version>3.2.1</acme4j.version>
     </properties>
 
     <dependencies>
@@ -36,11 +35,6 @@
             <version>${acme4j.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.shredzone.acme4j</groupId>
-            <artifactId>acme4j-utils</artifactId>
-            <version>${acme4j.version}</version>
-        </dependency>
         <dependency>
             <groupId>me.legrange.services</groupId>
             <artifactId>service-logging</artifactId>
