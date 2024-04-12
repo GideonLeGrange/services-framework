@@ -8,9 +8,10 @@
         <version>4.4.0</version>
     </parent>
     <artifactId>service-jetty</artifactId>
+    <name>Jetty Web Server Integration</name>
     <packaging>jar</packaging>
     <properties>
-        <jetty.version>11.0.15</jetty.version>
+        <jetty.version>12.0.3</jetty.version>
         <jersey.version>3.1.0</jersey.version>
     </properties>
 
@@ -33,8 +34,8 @@
             <classifier>config</classifier>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlet</artifactId>
+            <groupId>org.eclipse.jetty.ee10</groupId>
+            <artifactId>jetty-ee10-servlet</artifactId>
             <version>${jetty.version}</version>
         </dependency>
 
@@ -64,6 +65,10 @@
             <version>2.10.1</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>6.0.0</version>
+        </dependency>
     </dependencies>
-    <name>Jetty Web Server Integration</name>
 </project>
