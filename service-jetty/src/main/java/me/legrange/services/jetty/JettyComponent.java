@@ -5,20 +5,35 @@ import jakarta.ws.rs.ext.MessageBodyWriter;
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.servlet.ServletContainer;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.EventListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +41,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static java.lang.String.format;
+import static me.legrange.log.Log.debug;
 import static me.legrange.log.Log.info;
 import static me.legrange.log.Log.warning;
 
@@ -59,8 +75,15 @@ public class JettyComponent extends Component<Service<?>, JettyConfig> {
         if (config.isEnabled()) {
             try {
                 context = makeContext();
-                server = new Server(config.getPort());
+                server = new Server();
                 server.setHandler(gzip(context));
+                var connectors = new ArrayList<ServerConnector>();
+                connectors.add(setupHttp(server, config));
+                if (config.getHttps() != null) {
+                    connectors.add(setupHttps(server, config.getHttps()));
+                    info("HTTPS enabled on port %d", config.getHttps().getPort());
+                }
+                server.setConnectors(connectors.toArray(new Connector[]{}));
                 server.start();
                 info("Started Jetty server on port %d", config.getPort());
             } catch (Exception ex) {
@@ -175,6 +198,16 @@ public class JettyComponent extends Component<Service<?>, JettyConfig> {
         }
     }
 
+    public void addCertificate(String alias, Certificate cert) throws ComponentException {
+        try {
+            var keyStore = validateKeyStore(config.getHttps());
+            keyStore.setCertificateEntry(alias, cert);
+            keyStore.store(new FileOutputStream(config.getHttps().getKeystorePath()), config.getHttps().getKeystorePassword().toCharArray());
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
+            throw new ComponentException(format("Error adding certificate to key store (%s)",  e.getMessage()),e);
+        }
+    }
+
     /**
      * Check for a MessageBodyWriter
      */
@@ -210,4 +243,57 @@ public class JettyComponent extends Component<Service<?>, JettyConfig> {
         }
         return context;
     }
+
+    private ServerConnector setupHttps(Server server, HttpsConfig config) throws ComponentException {
+        // HTTPS configuration
+        var https = new HttpConfiguration();
+        https.addCustomizer(new SecureRequestCustomizer());
+        // Configuring SSL
+        var sslContextFactory = new SslContextFactory.Server();
+        // Defining keystore path and passwords
+    //    sslContextFactory.setKeyStore(validateKeyStore(config));
+        sslContextFactory.setKeyStorePath("/tmp/keystore");
+        sslContextFactory.setKeyStorePassword("suckmyballsmate");
+        // Configuring the connector
+        var sslConnector = new ServerConnector(server, new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(https));
+        sslConnector.setPort(config.getPort());
+        debug("Setup HTTPS on port %d", config.getPort());
+        return sslConnector;
+    }
+
+    private ServerConnector setupHttp(Server server, JettyConfig config) {
+        // HTTP Configuration
+        var http = new HttpConfiguration();
+        http.addCustomizer(new SecureRequestCustomizer());
+        var connector = new ServerConnector(server);
+        connector.addConnectionFactory(new HttpConnectionFactory(http));
+        // Setting HTTP port
+        connector.setPort(config.getPort());
+        debug("Setup HTTP on port %d", config.getPort());
+        return connector;
+    }
+
+    private KeyStore validateKeyStore(HttpsConfig config) throws ComponentException {
+        var file = new File(config.getKeystorePath());
+        if (!file.exists()) {
+            try {
+                var keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                keyStore.load(null, null);
+                keyStore.store(new FileOutputStream(file), config.getKeystorePassword().toCharArray());
+                return keyStore;
+            } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
+                throw new ComponentException(format("Error creating keystore (%s)", e.getMessage()), e);
+            }
+        } else {
+            try {
+
+                var keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                keyStore.load(new FileInputStream(config.getKeystorePath()), config.getKeystorePassword().toCharArray());
+                return keyStore;
+            } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
+                throw new ComponentException(format("Error loading keystore (%s)", e.getMessage()), e);
+            }
+        }
+    }
+
 }

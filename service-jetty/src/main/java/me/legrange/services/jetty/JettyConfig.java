@@ -17,6 +17,8 @@ public class JettyConfig {
     private boolean enabled =  true;
     private boolean standardErrorFilter = true;
 
+    private HttpsConfig https;
+
     public static JettyConfig disabled() {
         var config = new JettyConfig();
         config.enabled = false;
@@ -39,4 +41,7 @@ public class JettyConfig {
         return standardErrorFilter;
     }
 
+    public HttpsConfig getHttps() {
+        return https;
+    }
 }

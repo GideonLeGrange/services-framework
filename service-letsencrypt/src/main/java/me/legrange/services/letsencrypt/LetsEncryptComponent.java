@@ -18,31 +18,47 @@ import org.shredzone.acme4j.util.CSRBuilder;
 import org.shredzone.acme4j.util.KeyPairUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.KeyPair;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
 
-public final class LetsEncryptComponent extends Component<Service, LetsEncryptConfig> implements WithJetty, WithLogging {
+public final class LetsEncryptComponent extends Component<Service<?>, LetsEncryptConfig> implements WithJetty, WithLogging {
 
     private static LetsEncryptComponent instance;
     private LetsEncryptConfig config;
-    private Map<String, String> challengeResponses = new ConcurrentHashMap();
+    private final Map<String, String> challengeResponses = new ConcurrentHashMap<>();
 
-    public LetsEncryptComponent(Service service) {
+    public LetsEncryptComponent(Service<?> service) {
         super(service);
     }
 
     @Override
     public void start(LetsEncryptConfig config) throws ComponentException {
         this.config = config;
-        this.instance = this;
+        instance = this;
+        var dir = Path.of(config.getDataDirectory());
+        if (!Files.exists(dir)) {
+            try {
+                Files.createDirectories(dir);
+            } catch (IOException e) {
+                throw new ComponentException(format("Certificate directory %s does not exist and cannot be created (%s)",
+                        dir, e.getMessage()));
+            }
+        }
         jetty().addEndpoint("/.well-known/acme-challenge", ChallengeEndpoint.class);
         if (hasCertificate()) {
             try {
@@ -73,7 +89,15 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
      * Activate the certificate
      */
     private void activateCertificate() throws LetsEcryptException {
-        throw new LetsEcryptException("Not yet implemented");
+        try {
+            var cf = CertificateFactory.getInstance("X.509");
+            var certs = cf.generateCertificates(new FileInputStream(getCertificateFileName()));
+            for (var cert : certs) {
+         //       jetty().addCertificate(UUID.randomUUID().toString(), cert);
+            }
+        } catch (FileNotFoundException | CertificateException e) {
+            throw new LetsEcryptException(format("Error activating certificate (%s)", e.getMessage()), e);
+        }
     }
 
     /**
@@ -84,7 +108,7 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
         try {
             try {
                 TimeUnit.SECONDS.sleep(10);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException ignored) {
             }
             KeyPair keyPair;
             if (!hasKeys()) {
@@ -95,13 +119,14 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
             Account account = createAccount(keyPair, hasAcmeUrl());
             Order order = createOrder(account);
             createCsr(order);
+            downloadCertificate(order);
         } catch (LetsEcryptException ex) {
             error(ex);
         }
     }
 
     /**
-     * Dowload the signed certificate
+     * Download the signed certificate
      *
      * @param order The order to use
      */
@@ -111,7 +136,7 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
             while (order.getStatus() != Status.VALID) {
                 try {
                     TimeUnit.SECONDS.sleep(3);
-                } catch (InterruptedException e) {
+                } catch (InterruptedException ignored) {
                 }
                 order.update();
             }
@@ -128,12 +153,11 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
      * Create a new certificate
      *
      * @param order The order to use
-     * @throws LetsEcryptException
      */
     private void createCsr(Order order) throws LetsEcryptException {
         debug("createCsr()");
-        KeyPair domainKeyPair = KeyPairUtils.createKeyPair(2048);
-        CSRBuilder csrb = new CSRBuilder();
+        var domainKeyPair = KeyPairUtils.createKeyPair(2048);
+        var csrb = new CSRBuilder();
         csrb.addDomain(config.getDomain());
         csrb.setOrganization(config.getOrganization());
         byte[] csr;
@@ -150,8 +174,6 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
     /**
      * Create a Let's Encrypt certificate order
      *
-     * @param account
-     * @return
      */
     private Order createOrder(Account account) throws LetsEcryptException {
         debug("createOrder()");
@@ -168,7 +190,7 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
                 while (auth.getStatus() != Status.VALID) {
                     try {
                         TimeUnit.SECONDS.sleep(3);
-                    } catch (InterruptedException e) {
+                    } catch (InterruptedException ignored) {
                     }
                     auth.update();
                 }
@@ -184,7 +206,6 @@ public final class LetsEncryptComponent extends Component<Service, LetsEncryptCo
      *
      * @param keyPair Key pair to use to create account
      * @return The account
-     * @throws LetsEcryptException
      */
     private Account createAccount(KeyPair keyPair, boolean onlyExisting) throws LetsEcryptException {
         debug("createAccount()");
