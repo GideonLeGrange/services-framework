@@ -11,7 +11,7 @@ import java.util.Map;
  *
  * @author gideon
  */
-public class LoggingConfig {
+public final class LoggingConfig {
     
     @NotNull(message="The log level must be specified")
     private Level level = Level.INFO;

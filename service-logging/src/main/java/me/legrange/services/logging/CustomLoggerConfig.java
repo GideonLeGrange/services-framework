@@ -2,7 +2,7 @@ package me.legrange.services.logging;
 
 import jakarta.validation.constraints.NotBlank;
 
-public class CustomLoggerConfig {
+public final class CustomLoggerConfig {
 
     @NotBlank(message = "If using a custom logger, the class name must be specified")
     private String className;

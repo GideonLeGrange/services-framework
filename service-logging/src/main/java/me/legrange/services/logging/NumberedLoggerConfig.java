@@ -4,7 +4,7 @@ package me.legrange.services.logging;
  *
  * @author gideon
  */
-public class NumberedLoggerConfig {
+public final class NumberedLoggerConfig {
     
     private String fileName;
 

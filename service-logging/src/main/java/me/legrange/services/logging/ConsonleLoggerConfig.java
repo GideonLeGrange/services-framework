@@ -6,8 +6,12 @@ import jakarta.validation.constraints.NotBlank;
  *
  * @author gideon
  */
-public class ConsonleLoggerConfig {
-    
+public final class ConsonleLoggerConfig {
 
-    
+    private boolean useEmoji;
+
+    public boolean isUseEmoji() {
+        return useEmoji;
+    }
+
 }

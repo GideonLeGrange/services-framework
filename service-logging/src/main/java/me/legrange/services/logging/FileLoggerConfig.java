@@ -6,18 +6,19 @@ import jakarta.validation.constraints.NotBlank;
  *
  * @author gideon
  */
-public class FileLoggerConfig {
+public final class FileLoggerConfig {
 
     @NotBlank(message =  "A filename must be specified")
     private String fileName;
+    private boolean useEmoji;
+
 
     public String getFileName() {
         return fileName;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public boolean isUseEmoji() {
+        return useEmoji;
     }
-    
-    
+
 }
