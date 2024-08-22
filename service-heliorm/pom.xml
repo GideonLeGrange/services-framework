@@ -4,7 +4,7 @@
     <parent>
         <groupId>me.legrange.services</groupId>
         <artifactId>services</artifactId>
-        <version>4.5.0</version>
+        <version>4.5.1</version>
     </parent>
     <artifactId>service-heliorm</artifactId>
     <packaging>jar</packaging>
