@@ -34,7 +34,7 @@ public final class LoggingComponent extends Component<Service<?>, LoggingConfig>
             if (config.getFileLogger() != null) {
                 logger = startFileLogger(config.getFileLogger());
             } else if (config.getConsoleLogger() != null) {
-                logger = startConsoleLogger();
+                logger = startConsoleLogger(config.getConsoleLogger());
             } else {
                 throw new ComponentException("No primary logger defined. Check your configuration!");
             }
@@ -79,11 +79,11 @@ public final class LoggingComponent extends Component<Service<?>, LoggingConfig>
     }
 
     private Logger startFileLogger(FileLoggerConfig flc) throws LoggerException {
-        return new FileLogger(flc.getFileName());
+        return new FileLogger(flc.getFileName(), flc.isUseEmoji());
     }
 
-    private Logger startConsoleLogger() throws LoggerException {
-        return new ConsoleLogger();
+    private Logger startConsoleLogger(ConsoleLoggerConfig conf) throws LoggerException {
+        return new ConsoleLogger(conf.isUseEmoji());
     }
 
     private Logger startNumberedExceptionLogger(Logger logger, NumberedLoggerConfig flc) throws LoggerException {

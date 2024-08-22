@@ -15,7 +15,7 @@ public final class LoggingConfig {
     
     @NotNull(message="The log level must be specified")
     private Level level = Level.INFO;
-    private ConsonleLoggerConfig consoleLogger;
+    private ConsoleLoggerConfig consoleLogger;
     private FileLoggerConfig fileLogger;
     private NumberedLoggerConfig numberedExceptionLogger;
     private CustomLoggerConfig customLogger;
@@ -45,11 +45,11 @@ public final class LoggingConfig {
         this.numberedExceptionLogger = numberedExceptionLogger;
     }
 
-    public ConsonleLoggerConfig getConsoleLogger() {
+    public ConsoleLoggerConfig getConsoleLogger() {
         return consoleLogger;
     }
 
-    public void setConsoleLogger(ConsonleLoggerConfig consoleLogger) {
+    public void setConsoleLogger(ConsoleLoggerConfig consoleLogger) {
         this.consoleLogger = consoleLogger;
     }
 
