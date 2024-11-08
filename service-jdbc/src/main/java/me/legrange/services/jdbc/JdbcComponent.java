@@ -5,7 +5,7 @@ import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
 import me.legrange.services.logging.WithLogging;
 
-import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -27,25 +27,26 @@ public class JdbcComponent<S extends Service, C extends JdbcConfig> extends Comp
         pool = new ConnectionPool(conf);
         boolean connected = false;
         while (!connected) {
-            try{
+            try {
                 info("Connecting to SQL server");
-                Connection connection = pool.getConnection();
+                var connection = pool.getConnection();
+                connection.close();
                 connected = true;
-            } catch (ConnectionPoolException ex) {
+            } catch (ConnectionPoolException | SQLException ex) {
                 error(ex);
             }
             if (!connected) {
                 warning("Could not connect to SQL server. Retrying in %d seconds", conf.getRetryTime());
                 try {
                     TimeUnit.SECONDS.sleep(conf.getRetryTime());
-                } catch (InterruptedException ex) {
+                } catch (InterruptedException ignored) {
                 }
             }
         }
     }
 
     @Override
-    public void stop() throws ComponentException {
+    public void stop() {
         pool.close();
     }
 

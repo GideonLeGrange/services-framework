@@ -18,6 +18,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.time.LocalDateTime;
 
 import static me.legrange.log.Log.debug;
 
@@ -39,6 +40,7 @@ public class GsonJerseyProvider implements MessageBodyWriter<Object>,
             GsonBuilder builder = new GsonBuilder()
                     .serializeNulls()
                     .setPrettyPrinting()
+                    .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeSerializer())
                     .enableComplexMapKeySerialization();
             gson = builder.create();
             debug("GsonJerseyProvider created");

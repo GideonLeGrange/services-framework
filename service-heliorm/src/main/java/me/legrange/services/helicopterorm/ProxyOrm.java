@@ -1,8 +1,6 @@
 package me.legrange.services.helicopterorm;
 
 import com.heliorm.Orm;
-import com.heliorm.OrmException;
-import com.heliorm.OrmTransaction;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

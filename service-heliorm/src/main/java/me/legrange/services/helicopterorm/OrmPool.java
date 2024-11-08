@@ -40,9 +40,9 @@ final class OrmPool {
             }
             available.add(createOrm());
         }
-        var orm = available.remove(0);
+        var orm = available.removeFirst();
         inUse.add(orm);
-        debug(() -> format("pool: available = %d, in use = %d", available.size(), inUse.size()));
+        debug(() -> format("pool[issue]: available = %d, in use = %d", available.size(), inUse.size()));
         return orm;
     }
 
@@ -54,8 +54,9 @@ final class OrmPool {
         inUse.remove(orm);
         available.add(orm);
         while (available.size() > MIN_POOL_SIZE) {
-            available.remove(0);
+           available.removeFirst().close();
         }
+        debug(() -> format("pool[release]: available = %d, in use = %d", available.size(), inUse.size()));
     }
 
     private Orm createOrm() throws OrmException {
