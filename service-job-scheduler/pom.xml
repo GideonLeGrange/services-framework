@@ -4,7 +4,7 @@
     <parent>
         <groupId>me.legrange.services</groupId>
         <artifactId>services</artifactId>
-        <version>4.5.4</version>
+        <version>4.5.5</version>
     </parent>
     <artifactId>service-job-scheduler</artifactId>
     <packaging>jar</packaging>
