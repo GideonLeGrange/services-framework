@@ -8,11 +8,13 @@ import me.legrange.services.logging.WithLogging;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
+import static java.lang.String.format;
+
 /**
  *
  * @author gideon
  */
-public class JdbcComponent<S extends Service, C extends JdbcConfig> extends Component<S, C> implements WithLogging {
+public class JdbcComponent<S extends Service<?>, C extends JdbcConfig> extends Component<S, C> implements WithLogging {
 
     private String dialect;
     private ConnectionPool pool;
@@ -25,17 +27,28 @@ public class JdbcComponent<S extends Service, C extends JdbcConfig> extends Comp
      public void start(JdbcConfig conf) throws ComponentException {
         dialect = conf.getDialect().toUpperCase();
         pool = new ConnectionPool(conf);
-        boolean connected = false;
+        var connected = false;
+        var retries = 0;
         while (!connected) {
             try {
-                info("Connecting to SQL server");
+                if (retries > 0) {
+                    warning("Retrying connection to SQL server - attempt %d of %d",
+                            retries, conf.getRetryAttempts());
+                }
+                else {
+                    info("Connecting to SQL server");
+                }
                 var connection = pool.getConnection();
                 connection.close();
                 connected = true;
             } catch (ConnectionPoolException | SQLException ex) {
-                error(ex);
+//                error(ex);
             }
             if (!connected) {
+                retries ++;
+                if (retries >= conf.getRetryAttempts()) {
+                    throw new ComponentException(format("Could not connect to SQL server after %d attempts", retries));
+                }
                 warning("Could not connect to SQL server. Retrying in %d seconds", conf.getRetryTime());
                 try {
                     TimeUnit.SECONDS.sleep(conf.getRetryTime());

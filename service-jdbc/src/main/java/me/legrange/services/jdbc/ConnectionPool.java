@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import static java.lang.String.format;
 
 public final class ConnectionPool {
+
     private static final HikariConfig config = new HikariConfig();
     private static HikariDataSource ds;
 
@@ -17,14 +18,16 @@ public final class ConnectionPool {
         config.setUsername(conf.getUsername());
         config.setPassword(conf.getPassword());
         config.setMaximumPoolSize(conf.getConnectionPoolSize());
-        ds = new HikariDataSource(config);
     }
 
     public Connection getConnection() throws ConnectionPoolException {
         try {
+            if (ds == null) {
+                ds = new HikariDataSource(config);
+            }
             return ds.getConnection();
         }
-        catch (SQLException ex) {
+        catch (Exception ex) {
             throw new ConnectionPoolException(format("Error getting SQL connection from connection pool (%s)", ex.getMessage()),ex);
         }
     }
