@@ -38,21 +38,21 @@ public class JdbcComponent<S extends Service<?>, C extends JdbcConfig> extends C
                 else {
                     info("Connecting to SQL server");
                 }
-                var connection = pool.getConnection();
-                connection.close();
-                connected = true;
+                try (var ignored = pool.getConnection()) {
+                    connected = true;
+                }
             } catch (ConnectionPoolException | SQLException ex) {
                 error("Error connecting to SQL server (%s)", ex.getMessage());
-            }
-            if (!connected) {
                 retries ++;
                 if (retries >= conf.getRetryAttempts()) {
                     throw new ComponentException(format("Could not connect to SQL server after %d attempts", retries));
                 }
-                warning("Could not connect to SQL server. Retrying in %d seconds", conf.getRetryTime());
-                try {
-                    TimeUnit.SECONDS.sleep(conf.getRetryTime());
-                } catch (InterruptedException ignored) {
+                else {
+                    warning("Could not connect to SQL server. Retrying in %d seconds", conf.getRetryTime());
+                    try {
+                        TimeUnit.SECONDS.sleep(conf.getRetryTime());
+                    } catch (InterruptedException ignored) {
+                    }
                 }
             }
         }

@@ -10,7 +10,7 @@ import jakarta.validation.constraints.NotNull;
  *
  * @author gideon
  */
-public class JdbcConfig {
+public final class JdbcConfig {
 
     @NotBlank(message = "The SQL dialect is required")
     private String dialect = "MYSQL";
@@ -29,6 +29,15 @@ public class JdbcConfig {
     private int retryAttempts = 5;
 
     private int connectionPoolSize = 10;
+
+    public JdbcConfig() {
+    }
+
+    public JdbcConfig(String url, String username, String password) {
+        this.url = url;
+        this.username = username;
+        this.password = password;
+    }
 
     public String getUsername() {
         return username;
