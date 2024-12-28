@@ -42,7 +42,7 @@ public class JdbcComponent<S extends Service<?>, C extends JdbcConfig> extends C
                 connection.close();
                 connected = true;
             } catch (ConnectionPoolException | SQLException ex) {
-//                error(ex);
+                error("Error connecting to SQL server (%s)", ex.getMessage());
             }
             if (!connected) {
                 retries ++;
