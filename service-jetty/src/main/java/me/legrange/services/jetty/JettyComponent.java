@@ -5,11 +5,14 @@ import jakarta.ws.rs.ext.MessageBodyWriter;
 import me.legrange.service.Component;
 import me.legrange.service.ComponentException;
 import me.legrange.service.Service;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.servlet.ServletContainer;
@@ -18,7 +21,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.EventListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +61,8 @@ public class JettyComponent extends Component<Service<?>, JettyConfig> {
         if (config.isEnabled()) {
             try {
                 context = makeContext();
-                server = new Server(config.getPort());
+                server = makeServer(config.getPort());
+                new Server(config.getPort());
                 server.setHandler(gzip(context));
                 server.start();
                 info("Started Jetty server on port %d", config.getPort());
@@ -173,6 +176,15 @@ public class JettyComponent extends Component<Service<?>, JettyConfig> {
                 addEndpoints(pair.getKey(), pair.getValue());
             }
         }
+    }
+
+    private Server makeServer(int port) {
+        var threadPool = new QueuedThreadPool();
+        threadPool.setVirtualThreadsExecutor(threadPool);
+        var connector = new ServerConnector(server);
+        connector.setPort(port);
+        server.setConnectors(new Connector[]{connector});
+        return new Server(threadPool);
     }
 
     /**
