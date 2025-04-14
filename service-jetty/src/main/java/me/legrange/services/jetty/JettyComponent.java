@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Executors;
 
 import static java.lang.String.format;
 import static me.legrange.log.Log.info;
@@ -180,11 +181,12 @@ public class JettyComponent extends Component<Service<?>, JettyConfig> {
 
     private Server makeServer(int port) {
         var threadPool = new QueuedThreadPool();
-        threadPool.setVirtualThreadsExecutor(threadPool);
+        threadPool.setVirtualThreadsExecutor(Executors.newVirtualThreadPerTaskExecutor());
+        server = new Server(threadPool);
         var connector = new ServerConnector(server);
         connector.setPort(port);
         server.setConnectors(new Connector[]{connector});
-        return new Server(threadPool);
+        return server;
     }
 
     /**
