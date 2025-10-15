@@ -23,7 +23,7 @@ import me.legrange.services.logging.WithLogging;
 public final class RabbitMqComponent extends Component<Service, RabbitMqConfig> implements WithLogging {
 
     private Connection rabbitMq;
-    private Channel channel;
+    private ThreadLocal<Channel> channel;
     private RabbitMqConfig conf;
 
     public RabbitMqComponent(Service service) {
@@ -63,7 +63,6 @@ public final class RabbitMqComponent extends Component<Service, RabbitMqConfig> 
                 rabbitMq.addShutdownListener((ShutdownSignalException signal) -> {
                     warning("RabbitMQ connection to %s shut down. Reason: %s", conf.getHostname(), signal.getMessage());
                 });
-                channel = rabbitMq.createChannel();
                 connected = true;
                 info("Connected to RabbitMQ server %s", conf.getHostname());
             } catch (IOException ex) {
@@ -93,7 +92,15 @@ public final class RabbitMqComponent extends Component<Service, RabbitMqConfig> 
         if (rabbitMq == null) {
             startRabbitMq();
         }
-        return channel;
+        if (channel.get() == null) {
+            try {
+                channel.set(rabbitMq.createChannel());
+            }
+            catch (IOException e) {
+                throw new ComponentException(e.getMessage(), e);
+            }
+        }
+        return channel.get();
     }
 
     @Override
