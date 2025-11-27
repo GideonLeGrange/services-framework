@@ -23,7 +23,7 @@ import me.legrange.services.logging.WithLogging;
 public final class RabbitMqComponent extends Component<Service, RabbitMqConfig> implements WithLogging {
 
     private Connection rabbitMq;
-    private ThreadLocal<Channel> channel;
+    private final static ThreadLocal<Channel> channel = new ThreadLocal<>();
     private RabbitMqConfig conf;
 
     public RabbitMqComponent(Service service) {
