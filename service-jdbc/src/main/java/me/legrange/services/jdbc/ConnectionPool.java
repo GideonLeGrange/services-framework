@@ -18,6 +18,7 @@ public final class ConnectionPool {
         config.setUsername(conf.getUsername());
         config.setPassword(conf.getPassword());
         config.setMaximumPoolSize(conf.getConnectionPoolSize());
+        config.setMinimumIdle(conf.getMinimumIdleConnections());
     }
 
     public Connection getConnection() throws ConnectionPoolException {

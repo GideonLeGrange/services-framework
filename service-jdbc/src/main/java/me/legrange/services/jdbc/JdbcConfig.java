@@ -28,7 +28,11 @@ public final class JdbcConfig {
     @NotNull
     private int retryAttempts = 5;
 
+    @Min(1)
     private int connectionPoolSize = 10;
+
+    @Min(1)
+    private int minimumIdleConnections = 2;
 
     public JdbcConfig() {
     }
@@ -65,5 +69,9 @@ public final class JdbcConfig {
 
     public int getRetryAttempts() {
         return retryAttempts;
+    }
+
+    public int getMinimumIdleConnections() {
+        return minimumIdleConnections;
     }
 }
